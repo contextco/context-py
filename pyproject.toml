@@ -2,7 +2,7 @@
 name = "context-python"
 version = "0.1.0"
 description = "Python SDK for the Context API"
-authors = ["Alex Gamble <agamble.uk@gmail.com>"]
+authors = ["Alex Gamble <alex@woolly.ai>"]
 readme = "README.md"
 packages = [{include = "getcontext"}]
 
