@@ -1,8 +1,14 @@
 # Context Python Library
 
+[![PyPI version](https://badge.fury.io/py/context-python.svg)](https://badge.fury.io/py/context-python)
+
 The Context Python library provides a convenient way to interface with the Context APIs. We include pre-defined classes and operations to interact with API resources.
 
 ## Installation
+
+```
+pip install --upgrade context-python
+```
 
 ## Usage
 
