@@ -28,3 +28,25 @@ c.log.conversation(
         )
     }
 )
+
+c.log.conversation_upsert(
+    body={
+        "conversation": Conversation(
+            messages=[
+                Message(
+                    message="You are a helpful assistant!",
+                    role=MessageRole.SYSTEM,
+                ),
+                Message(
+                    message="Hello, world!",
+                    role=MessageRole.USER,
+                ),
+                Message(
+                    message="Hi, how can I help?",
+                    role=MessageRole.ASSISTANT,
+                    rating=Rating.POSITIVE,
+                ),
+            ],
+        )
+    }
+)

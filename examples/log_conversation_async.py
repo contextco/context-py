@@ -32,6 +32,28 @@ async def log():
             }
         )
 
+        await client.log.conversation_upsert(
+            body={
+                "conversation": Conversation(
+                    messages=[
+                        Message(
+                            message="You are a helpful assistant!",
+                            role=MessageRole.SYSTEM,
+                        ),
+                        Message(
+                            message="Hello, world!",
+                            role=MessageRole.USER,
+                        ),
+                        Message(
+                            message="Hi, how can I help?",
+                            role=MessageRole.ASSISTANT,
+                            rating=Rating.POSITIVE,
+                        ),
+                    ],
+                )
+            }
+        )
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(log())
