@@ -1,5 +1,5 @@
 import getcontext
-from getcontext.generated.models import Conversation, Message, MessageRole, Rating
+from getcontext.generated.models import Conversation, Message, MessageRole, Rating, Thread
 from getcontext.token import Credential
 import os
 
@@ -34,7 +34,8 @@ c.log.conversation(
 
 c.log.conversation_thread(
     body={
-        "conversation": Conversation(
+        "conversation": Thread(
+            id="Thread1234",
             messages=[
                 Message(
                     message="You are a helpful assistant!",

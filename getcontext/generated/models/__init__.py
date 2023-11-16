@@ -27,7 +27,7 @@ from ._models import PathsRai0VpApiV1LogConversationUpsertPostRequestbodyContent
 from ._models import PathsXq2NqjApiV1ConversationsSeriesRatingGetResponses200ContentApplicationJsonSchema
 from ._models import PathsY5Azv9ApiV1ConversationsGetResponses200ContentApplicationJsonSchema
 from ._models import SeriesItem
-from ._models import ThreadParams
+from ._models import Thread
 from ._models import Topic
 from ._models import TopicWithSamples
 
@@ -63,7 +63,7 @@ __all__ = [
     "PathsXq2NqjApiV1ConversationsSeriesRatingGetResponses200ContentApplicationJsonSchema",
     "PathsY5Azv9ApiV1ConversationsGetResponses200ContentApplicationJsonSchema",
     "SeriesItem",
-    "ThreadParams",
+    "Thread",
     "Topic",
     "TopicWithSamples",
     "ConversationSentimentTrend",

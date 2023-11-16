@@ -716,17 +716,17 @@ class Paths1S2Rf6XApiV1LogConversationThreadPostRequestbodyContentApplicationJso
     """Paths1S2Rf6XApiV1LogConversationThreadPostRequestbodyContentApplicationJsonSchema.
 
     :ivar conversation:
-    :vartype conversation: ~context_api.models.ThreadParams
+    :vartype conversation: ~context_api.models.Thread
     """
 
     _attribute_map = {
-        "conversation": {"key": "conversation", "type": "ThreadParams"},
+        "conversation": {"key": "conversation", "type": "Thread"},
     }
 
-    def __init__(self, *, conversation: Optional["_models.ThreadParams"] = None, **kwargs: Any) -> None:
+    def __init__(self, *, conversation: Optional["_models.Thread"] = None, **kwargs: Any) -> None:
         """
         :keyword conversation:
-        :paramtype conversation: ~context_api.models.ThreadParams
+        :paramtype conversation: ~context_api.models.Thread
         """
         super().__init__(**kwargs)
         self.conversation = conversation
@@ -1038,8 +1038,8 @@ class SeriesItem(_serialization.Model):
         self.data = data
 
 
-class ThreadParams(_serialization.Model):
-    """ThreadParams.
+class Thread(_serialization.Model):
+    """Thread.
 
     All required parameters must be populated in order to send to server.
 
