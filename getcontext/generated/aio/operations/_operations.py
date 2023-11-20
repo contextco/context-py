@@ -23,18 +23,18 @@ from azure.core.utils import case_insensitive_dict
 from ... import models as _models
 from ...operations._operations import (
     build_context_api_conversation_request,
+    build_context_api_conversation_series_request,
     build_context_api_conversations_request,
+    build_context_api_estimated_cost_request,
     build_context_api_rating_request,
     build_context_api_sentiment_request,
+    build_context_api_suggested_topic_conversations_request,
+    build_context_api_suggested_topic_statistics_request,
+    build_context_api_suggested_topics_request,
     build_context_api_volume_request,
-    build_conversation_series_request,
-    build_estimated_cost_request,
     build_log_conversation_request,
     build_log_conversation_thread_request,
     build_log_conversation_upsert_request,
-    build_suggested_topic_conversations_request,
-    build_suggested_topic_statistics_request,
-    build_suggested_topics_request,
 )
 from .._vendor import ContextAPIMixinABC
 
@@ -42,27 +42,9 @@ T = TypeVar("T")
 ClsType = Optional[Callable[[PipelineResponse[HttpRequest, AsyncHttpResponse], T, Dict[str, Any]], Any]]
 
 
-class ConversationOperations:
-    """
-    .. warning::
-        **DO NOT** instantiate this class directly.
-
-        Instead, you should access the following operations through
-        :class:`~context_api.aio.ContextAPI`'s
-        :attr:`conversation` attribute.
-    """
-
-    models = _models
-
-    def __init__(self, *args, **kwargs) -> None:
-        input_args = list(args)
-        self._client = input_args.pop(0) if input_args else kwargs.pop("client")
-        self._config = input_args.pop(0) if input_args else kwargs.pop("config")
-        self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
-        self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
-
+class ContextAPIOperationsMixin(ContextAPIMixinABC):
     @distributed_trace_async
-    async def series(
+    async def conversation_series(
         self, *, authorization: Optional[str] = None, **kwargs: Any
     ) -> _models.PathsPixtmzApiV1ConversationsSeriesGetResponses200ContentApplicationJsonSchema:
         """Returns index of series.
@@ -91,7 +73,7 @@ class ConversationOperations:
             _models.PathsPixtmzApiV1ConversationsSeriesGetResponses200ContentApplicationJsonSchema
         ] = kwargs.pop("cls", None)
 
-        _request = build_conversation_series_request(
+        _request = build_context_api_conversation_series_request(
             authorization=authorization,
             headers=_headers,
             params=_params,
@@ -99,7 +81,7 @@ class ConversationOperations:
         _request.url = self._client.format_url(_request.url)
 
         _stream = False
-        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # pylint: disable=protected-access
+        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # type: ignore # pylint: disable=protected-access
             _request, stream=_stream, **kwargs
         )
 
@@ -120,8 +102,6 @@ class ConversationOperations:
 
         return deserialized  # type: ignore
 
-
-class ContextAPIOperationsMixin(ContextAPIMixinABC):
     @distributed_trace_async
     async def sentiment(
         self,
@@ -279,6 +259,89 @@ class ContextAPIOperationsMixin(ContextAPIMixinABC):
 
         deserialized = self._deserialize(
             "PathsXq2NqjApiV1ConversationsSeriesRatingGetResponses200ContentApplicationJsonSchema", pipeline_response
+        )
+
+        if cls:
+            return cls(pipeline_response, deserialized, {})  # type: ignore
+
+        return deserialized  # type: ignore
+
+    @distributed_trace_async
+    async def estimated_cost(
+        self,
+        *,
+        tenant_id: Optional[str] = None,
+        start_time: Optional[str] = None,
+        end_time: Optional[str] = None,
+        period: Optional[str] = None,
+        authorization: Optional[str] = None,
+        **kwargs: Any
+    ) -> _models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema:
+        """Returns estimated cost details.
+
+        Returns estimated cost details.
+
+        :keyword tenant_id: Filter by tenant id.:code:`<br />`. Default value is None.
+        :paramtype tenant_id: str
+        :keyword start_time: Limits scope to data that occurred after given time.:code:`<br />`Must be
+         ISO 8601. Defaults to the beginning of 6 days ago.:code:`<br />`. Default value is None.
+        :paramtype start_time: str
+        :keyword end_time: Limits scope to data that occurred before given time.:code:`<br />`Must be
+         ISO 8601. Defaults to now.:code:`<br />`. Default value is None.
+        :paramtype end_time: str
+        :keyword period: Period to group data by. Defaults to day. Options are: day, week,
+         month.:code:`<br />`. Default value is None.
+        :paramtype period: str
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :return:
+         Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+        :rtype:
+         ~context_api.models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+        error_map = {
+            401: ClientAuthenticationError,
+            404: ResourceNotFoundError,
+            409: ResourceExistsError,
+            304: ResourceNotModifiedError,
+        }
+        error_map.update(kwargs.pop("error_map", {}) or {})
+
+        _headers = kwargs.pop("headers", {}) or {}
+        _params = kwargs.pop("params", {}) or {}
+
+        cls: ClsType[
+            _models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+        ] = kwargs.pop("cls", None)
+
+        _request = build_context_api_estimated_cost_request(
+            tenant_id=tenant_id,
+            start_time=start_time,
+            end_time=end_time,
+            period=period,
+            authorization=authorization,
+            headers=_headers,
+            params=_params,
+        )
+        _request.url = self._client.format_url(_request.url)
+
+        _stream = False
+        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # type: ignore # pylint: disable=protected-access
+            _request, stream=_stream, **kwargs
+        )
+
+        response = pipeline_response.http_response
+
+        if response.status_code not in [200]:
+            if _stream:
+                await response.read()  # Load the body in memory and close the socket
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            raise HttpResponseError(response=response)
+
+        deserialized = self._deserialize(
+            "Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema",
+            pipeline_response,
         )
 
         if cls:
@@ -511,58 +574,94 @@ class ContextAPIOperationsMixin(ContextAPIMixinABC):
 
         return deserialized  # type: ignore
 
-
-class EstimatedOperations:
-    """
-    .. warning::
-        **DO NOT** instantiate this class directly.
-
-        Instead, you should access the following operations through
-        :class:`~context_api.aio.ContextAPI`'s
-        :attr:`estimated` attribute.
-    """
-
-    models = _models
-
-    def __init__(self, *args, **kwargs) -> None:
-        input_args = list(args)
-        self._client = input_args.pop(0) if input_args else kwargs.pop("client")
-        self._config = input_args.pop(0) if input_args else kwargs.pop("config")
-        self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
-        self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
-
     @distributed_trace_async
-    async def cost(
+    async def suggested_topics(
         self,
         *,
-        tenant_id: Optional[str] = None,
-        start_time: Optional[str] = None,
-        end_time: Optional[str] = None,
-        period: Optional[str] = None,
         authorization: Optional[str] = None,
+        page: Optional[int] = None,
+        per_page: Optional[int] = None,
         **kwargs: Any
-    ) -> _models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema:
-        """Returns estimated cost details.
+    ) -> _models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema:
+        """Returns suggested topics details.
 
-        Returns estimated cost details.
+        Returns suggested topics details.
 
-        :keyword tenant_id: Filter by tenant id.:code:`<br />`. Default value is None.
-        :paramtype tenant_id: str
-        :keyword start_time: Limits scope to data that occurred after given time.:code:`<br />`Must be
-         ISO 8601. Defaults to the beginning of 6 days ago.:code:`<br />`. Default value is None.
-        :paramtype start_time: str
-        :keyword end_time: Limits scope to data that occurred before given time.:code:`<br />`Must be
-         ISO 8601. Defaults to now.:code:`<br />`. Default value is None.
-        :paramtype end_time: str
-        :keyword period: Period to group data by. Defaults to day. Options are: day, week,
-         month.:code:`<br />`. Default value is None.
-        :paramtype period: str
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :keyword page: Page number of results to return. Defaults to 1.:code:`<br />`. Default value is
+         None.
+        :paramtype page: int
+        :keyword per_page: Number of results to return per page. Defaults to 20.:code:`<br />`. Default
+         value is None.
+        :paramtype per_page: int
+        :return: Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema
+        :rtype:
+         ~context_api.models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+        error_map = {
+            401: ClientAuthenticationError,
+            404: ResourceNotFoundError,
+            409: ResourceExistsError,
+            304: ResourceNotModifiedError,
+        }
+        error_map.update(kwargs.pop("error_map", {}) or {})
+
+        _headers = kwargs.pop("headers", {}) or {}
+        _params = kwargs.pop("params", {}) or {}
+
+        cls: ClsType[_models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema] = kwargs.pop(
+            "cls", None
+        )
+
+        _request = build_context_api_suggested_topics_request(
+            authorization=authorization,
+            page=page,
+            per_page=per_page,
+            headers=_headers,
+            params=_params,
+        )
+        _request.url = self._client.format_url(_request.url)
+
+        _stream = False
+        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # type: ignore # pylint: disable=protected-access
+            _request, stream=_stream, **kwargs
+        )
+
+        response = pipeline_response.http_response
+
+        if response.status_code not in [200]:
+            if _stream:
+                await response.read()  # Load the body in memory and close the socket
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            raise HttpResponseError(response=response)
+
+        deserialized = self._deserialize(
+            "Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema", pipeline_response
+        )
+
+        if cls:
+            return cls(pipeline_response, deserialized, {})  # type: ignore
+
+        return deserialized  # type: ignore
+
+    @distributed_trace_async
+    async def suggested_topic_conversations(
+        self, id: str, *, authorization: Optional[str] = None, **kwargs: Any
+    ) -> _models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema:
+        """Returns statistics of selected topic.
+
+        Returns statistics of selected topic.
+
+        :param id: Required.
+        :type id: str
         :keyword authorization: Default value is None.
         :paramtype authorization: str
         :return:
-         Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+         Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
         :rtype:
-         ~context_api.models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+         ~context_api.models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
         :raises ~azure.core.exceptions.HttpResponseError:
         """
         error_map = {
@@ -577,14 +676,11 @@ class EstimatedOperations:
         _params = kwargs.pop("params", {}) or {}
 
         cls: ClsType[
-            _models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+            _models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
         ] = kwargs.pop("cls", None)
 
-        _request = build_estimated_cost_request(
-            tenant_id=tenant_id,
-            start_time=start_time,
-            end_time=end_time,
-            period=period,
+        _request = build_context_api_suggested_topic_conversations_request(
+            id=id,
             authorization=authorization,
             headers=_headers,
             params=_params,
@@ -592,7 +688,7 @@ class EstimatedOperations:
         _request.url = self._client.format_url(_request.url)
 
         _stream = False
-        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # pylint: disable=protected-access
+        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # type: ignore # pylint: disable=protected-access
             _request, stream=_stream, **kwargs
         )
 
@@ -605,7 +701,96 @@ class EstimatedOperations:
             raise HttpResponseError(response=response)
 
         deserialized = self._deserialize(
-            "Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema",
+            "Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema",
+            pipeline_response,
+        )
+
+        if cls:
+            return cls(pipeline_response, deserialized, {})  # type: ignore
+
+        return deserialized  # type: ignore
+
+    @distributed_trace_async
+    async def suggested_topic_statistics(
+        self,
+        id: str,
+        *,
+        authorization: Optional[str] = None,
+        start_time: Optional[str] = None,
+        end_time: Optional[str] = None,
+        page: Optional[int] = None,
+        per_page: Optional[int] = None,
+        **kwargs: Any
+    ) -> _models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema:
+        """Returns a list of conversations matching given topic.
+
+        Returns a list of conversations matching given topic.
+
+        :param id: Required.
+        :type id: str
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :keyword start_time: Limits returned conversations to those that occurred after given
+         time.:code:`<br />`Must be ISO 8601. Defaults to the beginning of 6 days ago.:code:`<br />`.
+         Default value is None.
+        :paramtype start_time: str
+        :keyword end_time: Limits returned conversations to those that occurred before given
+         time.:code:`<br />`Must be ISO 8601. Defaults to now.:code:`<br />`. Default value is None.
+        :paramtype end_time: str
+        :keyword page: Page number of results to return. Defaults to 1.:code:`<br />`. Default value is
+         None.
+        :paramtype page: int
+        :keyword per_page: Number of results to return per page. Defaults to 20.:code:`<br />`. Default
+         value is None.
+        :paramtype per_page: int
+        :return:
+         Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
+        :rtype:
+         ~context_api.models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+        error_map = {
+            401: ClientAuthenticationError,
+            404: ResourceNotFoundError,
+            409: ResourceExistsError,
+            304: ResourceNotModifiedError,
+        }
+        error_map.update(kwargs.pop("error_map", {}) or {})
+
+        _headers = kwargs.pop("headers", {}) or {}
+        _params = kwargs.pop("params", {}) or {}
+
+        cls: ClsType[
+            _models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
+        ] = kwargs.pop("cls", None)
+
+        _request = build_context_api_suggested_topic_statistics_request(
+            id=id,
+            authorization=authorization,
+            start_time=start_time,
+            end_time=end_time,
+            page=page,
+            per_page=per_page,
+            headers=_headers,
+            params=_params,
+        )
+        _request.url = self._client.format_url(_request.url)
+
+        _stream = False
+        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # type: ignore # pylint: disable=protected-access
+            _request, stream=_stream, **kwargs
+        )
+
+        response = pipeline_response.http_response
+
+        if response.status_code not in [200]:
+            if _stream:
+                await response.read()  # Load the body in memory and close the socket
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            raise HttpResponseError(response=response)
+
+        deserialized = self._deserialize(
+            "Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema",
             pipeline_response,
         )
 
@@ -1039,251 +1224,6 @@ class LogOperations:
 
         deserialized = self._deserialize(
             "PathsDo7Pm8ApiV1LogConversationThreadPostResponses201ContentApplicationJsonSchema", pipeline_response
-        )
-
-        if cls:
-            return cls(pipeline_response, deserialized, {})  # type: ignore
-
-        return deserialized  # type: ignore
-
-
-class SuggestedOperations:
-    """
-    .. warning::
-        **DO NOT** instantiate this class directly.
-
-        Instead, you should access the following operations through
-        :class:`~context_api.aio.ContextAPI`'s
-        :attr:`suggested` attribute.
-    """
-
-    models = _models
-
-    def __init__(self, *args, **kwargs) -> None:
-        input_args = list(args)
-        self._client = input_args.pop(0) if input_args else kwargs.pop("client")
-        self._config = input_args.pop(0) if input_args else kwargs.pop("config")
-        self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
-        self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
-
-    @distributed_trace_async
-    async def topics(
-        self,
-        *,
-        authorization: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        **kwargs: Any
-    ) -> _models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema:
-        """Returns suggested topics details.
-
-        Returns suggested topics details.
-
-        :keyword authorization: Default value is None.
-        :paramtype authorization: str
-        :keyword page: Page number of results to return. Defaults to 1.:code:`<br />`. Default value is
-         None.
-        :paramtype page: int
-        :keyword per_page: Number of results to return per page. Defaults to 20.:code:`<br />`. Default
-         value is None.
-        :paramtype per_page: int
-        :return: Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema
-        :rtype:
-         ~context_api.models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema
-        :raises ~azure.core.exceptions.HttpResponseError:
-        """
-        error_map = {
-            401: ClientAuthenticationError,
-            404: ResourceNotFoundError,
-            409: ResourceExistsError,
-            304: ResourceNotModifiedError,
-        }
-        error_map.update(kwargs.pop("error_map", {}) or {})
-
-        _headers = kwargs.pop("headers", {}) or {}
-        _params = kwargs.pop("params", {}) or {}
-
-        cls: ClsType[_models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema] = kwargs.pop(
-            "cls", None
-        )
-
-        _request = build_suggested_topics_request(
-            authorization=authorization,
-            page=page,
-            per_page=per_page,
-            headers=_headers,
-            params=_params,
-        )
-        _request.url = self._client.format_url(_request.url)
-
-        _stream = False
-        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # pylint: disable=protected-access
-            _request, stream=_stream, **kwargs
-        )
-
-        response = pipeline_response.http_response
-
-        if response.status_code not in [200]:
-            if _stream:
-                await response.read()  # Load the body in memory and close the socket
-            map_error(status_code=response.status_code, response=response, error_map=error_map)
-            raise HttpResponseError(response=response)
-
-        deserialized = self._deserialize(
-            "Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema", pipeline_response
-        )
-
-        if cls:
-            return cls(pipeline_response, deserialized, {})  # type: ignore
-
-        return deserialized  # type: ignore
-
-    @distributed_trace_async
-    async def topic_conversations(
-        self, id: str, *, authorization: Optional[str] = None, **kwargs: Any
-    ) -> _models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema:
-        """Returns statistics of selected topic.
-
-        Returns statistics of selected topic.
-
-        :param id: Required.
-        :type id: str
-        :keyword authorization: Default value is None.
-        :paramtype authorization: str
-        :return:
-         Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
-        :rtype:
-         ~context_api.models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
-        :raises ~azure.core.exceptions.HttpResponseError:
-        """
-        error_map = {
-            401: ClientAuthenticationError,
-            404: ResourceNotFoundError,
-            409: ResourceExistsError,
-            304: ResourceNotModifiedError,
-        }
-        error_map.update(kwargs.pop("error_map", {}) or {})
-
-        _headers = kwargs.pop("headers", {}) or {}
-        _params = kwargs.pop("params", {}) or {}
-
-        cls: ClsType[
-            _models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
-        ] = kwargs.pop("cls", None)
-
-        _request = build_suggested_topic_conversations_request(
-            id=id,
-            authorization=authorization,
-            headers=_headers,
-            params=_params,
-        )
-        _request.url = self._client.format_url(_request.url)
-
-        _stream = False
-        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # pylint: disable=protected-access
-            _request, stream=_stream, **kwargs
-        )
-
-        response = pipeline_response.http_response
-
-        if response.status_code not in [200]:
-            if _stream:
-                await response.read()  # Load the body in memory and close the socket
-            map_error(status_code=response.status_code, response=response, error_map=error_map)
-            raise HttpResponseError(response=response)
-
-        deserialized = self._deserialize(
-            "Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema",
-            pipeline_response,
-        )
-
-        if cls:
-            return cls(pipeline_response, deserialized, {})  # type: ignore
-
-        return deserialized  # type: ignore
-
-    @distributed_trace_async
-    async def topic_statistics(
-        self,
-        id: str,
-        *,
-        authorization: Optional[str] = None,
-        start_time: Optional[str] = None,
-        end_time: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        **kwargs: Any
-    ) -> _models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema:
-        """Returns a list of conversations matching given topic.
-
-        Returns a list of conversations matching given topic.
-
-        :param id: Required.
-        :type id: str
-        :keyword authorization: Default value is None.
-        :paramtype authorization: str
-        :keyword start_time: Limits returned conversations to those that occurred after given
-         time.:code:`<br />`Must be ISO 8601. Defaults to the beginning of 6 days ago.:code:`<br />`.
-         Default value is None.
-        :paramtype start_time: str
-        :keyword end_time: Limits returned conversations to those that occurred before given
-         time.:code:`<br />`Must be ISO 8601. Defaults to now.:code:`<br />`. Default value is None.
-        :paramtype end_time: str
-        :keyword page: Page number of results to return. Defaults to 1.:code:`<br />`. Default value is
-         None.
-        :paramtype page: int
-        :keyword per_page: Number of results to return per page. Defaults to 20.:code:`<br />`. Default
-         value is None.
-        :paramtype per_page: int
-        :return:
-         Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
-        :rtype:
-         ~context_api.models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
-        :raises ~azure.core.exceptions.HttpResponseError:
-        """
-        error_map = {
-            401: ClientAuthenticationError,
-            404: ResourceNotFoundError,
-            409: ResourceExistsError,
-            304: ResourceNotModifiedError,
-        }
-        error_map.update(kwargs.pop("error_map", {}) or {})
-
-        _headers = kwargs.pop("headers", {}) or {}
-        _params = kwargs.pop("params", {}) or {}
-
-        cls: ClsType[
-            _models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
-        ] = kwargs.pop("cls", None)
-
-        _request = build_suggested_topic_statistics_request(
-            id=id,
-            authorization=authorization,
-            start_time=start_time,
-            end_time=end_time,
-            page=page,
-            per_page=per_page,
-            headers=_headers,
-            params=_params,
-        )
-        _request.url = self._client.format_url(_request.url)
-
-        _stream = False
-        pipeline_response: PipelineResponse = await self._client._pipeline.run(  # pylint: disable=protected-access
-            _request, stream=_stream, **kwargs
-        )
-
-        response = pipeline_response.http_response
-
-        if response.status_code not in [200]:
-            if _stream:
-                await response.read()  # Load the body in memory and close the socket
-            map_error(status_code=response.status_code, response=response, error_map=error_map)
-            raise HttpResponseError(response=response)
-
-        deserialized = self._deserialize(
-            "Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema",
-            pipeline_response,
         )
 
         if cls:
