@@ -14,13 +14,7 @@ from azure.core.rest import HttpRequest, HttpResponse
 from . import models as _models
 from ._configuration import ContextAPIConfiguration
 from ._serialization import Deserializer, Serializer
-from .operations import (
-    ContextAPIOperationsMixin,
-    ConversationOperations,
-    EstimatedOperations,
-    LogOperations,
-    SuggestedOperations,
-)
+from .operations import ContextAPIOperationsMixin, LogOperations
 
 if TYPE_CHECKING:
     # pylint: disable=unused-import,ungrouped-imports
@@ -30,14 +24,8 @@ if TYPE_CHECKING:
 class ContextAPI(ContextAPIOperationsMixin):  # pylint: disable=client-accepts-api-version-keyword
     """ContextAPI.
 
-    :ivar conversation: ConversationOperations operations
-    :vartype conversation: context_api.operations.ConversationOperations
-    :ivar estimated: EstimatedOperations operations
-    :vartype estimated: context_api.operations.EstimatedOperations
     :ivar log: LogOperations operations
     :vartype log: context_api.operations.LogOperations
-    :ivar suggested: SuggestedOperations operations
-    :vartype suggested: context_api.operations.SuggestedOperations
     :param credential: Credential needed for the client to connect to Azure. Required.
     :type credential: ~azure.core.credentials.TokenCredential
     :keyword endpoint: Service URL. Default value is "https://api.context.ai".
@@ -71,10 +59,7 @@ class ContextAPI(ContextAPIOperationsMixin):  # pylint: disable=client-accepts-a
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
         self._serialize.client_side_validation = False
-        self.conversation = ConversationOperations(self._client, self._config, self._serialize, self._deserialize)
-        self.estimated = EstimatedOperations(self._client, self._config, self._serialize, self._deserialize)
         self.log = LogOperations(self._client, self._config, self._serialize, self._deserialize)
-        self.suggested = SuggestedOperations(self._client, self._config, self._serialize, self._deserialize)
 
     def send_request(self, request: HttpRequest, *, stream: bool = False, **kwargs: Any) -> HttpResponse:
         """Runs the network request through the client's chained policies.

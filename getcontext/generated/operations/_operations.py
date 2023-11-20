@@ -31,7 +31,9 @@ _SERIALIZER = Serializer()
 _SERIALIZER.client_side_validation = False
 
 
-def build_conversation_series_request(*, authorization: Optional[str] = None, **kwargs: Any) -> HttpRequest:
+def build_context_api_conversation_series_request(  # pylint: disable=name-too-long
+    *, authorization: Optional[str] = None, **kwargs: Any
+) -> HttpRequest:
     _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
 
     accept = _headers.pop("Accept", "application/json")
@@ -98,6 +100,41 @@ def build_context_api_rating_request(
 
     # Construct URL
     _url = "/api/v1/conversations/series/rating"
+
+    # Construct parameters
+    if tenant_id is not None:
+        _params["tenant_id"] = _SERIALIZER.query("tenant_id", tenant_id, "str")
+    if start_time is not None:
+        _params["start_time"] = _SERIALIZER.query("start_time", start_time, "str")
+    if end_time is not None:
+        _params["end_time"] = _SERIALIZER.query("end_time", end_time, "str")
+    if period is not None:
+        _params["period"] = _SERIALIZER.query("period", period, "str")
+
+    # Construct headers
+    if authorization is not None:
+        _headers["Authorization"] = _SERIALIZER.header("authorization", authorization, "str")
+    _headers["Accept"] = _SERIALIZER.header("accept", accept, "str")
+
+    return HttpRequest(method="GET", url=_url, params=_params, headers=_headers, **kwargs)
+
+
+def build_context_api_estimated_cost_request(
+    *,
+    tenant_id: Optional[str] = None,
+    start_time: Optional[str] = None,
+    end_time: Optional[str] = None,
+    period: Optional[str] = None,
+    authorization: Optional[str] = None,
+    **kwargs: Any
+) -> HttpRequest:
+    _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
+    _params = case_insensitive_dict(kwargs.pop("params", {}) or {})
+
+    accept = _headers.pop("Accept", "application/json")
+
+    # Construct URL
+    _url = "/api/v1/conversations/series/estimated_cost"
 
     # Construct parameters
     if tenant_id is not None:
@@ -213,13 +250,62 @@ def build_context_api_conversations_request(
     return HttpRequest(method="GET", url=_url, params=_params, headers=_headers, **kwargs)
 
 
-def build_estimated_cost_request(
+def build_context_api_suggested_topics_request(  # pylint: disable=name-too-long
+    *, authorization: Optional[str] = None, page: Optional[int] = None, per_page: Optional[int] = None, **kwargs: Any
+) -> HttpRequest:
+    _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
+    _params = case_insensitive_dict(kwargs.pop("params", {}) or {})
+
+    accept = _headers.pop("Accept", "application/json")
+
+    # Construct URL
+    _url = "/api/v1/topic_suggestions"
+
+    # Construct parameters
+    if page is not None:
+        _params["page"] = _SERIALIZER.query("page", page, "int")
+    if per_page is not None:
+        _params["per_page"] = _SERIALIZER.query("per_page", per_page, "int")
+
+    # Construct headers
+    if authorization is not None:
+        _headers["Authorization"] = _SERIALIZER.header("authorization", authorization, "str")
+    _headers["Accept"] = _SERIALIZER.header("accept", accept, "str")
+
+    return HttpRequest(method="GET", url=_url, params=_params, headers=_headers, **kwargs)
+
+
+def build_context_api_suggested_topic_conversations_request(  # pylint: disable=name-too-long
+    id: str, *, authorization: Optional[str] = None, **kwargs: Any
+) -> HttpRequest:
+    _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
+
+    accept = _headers.pop("Accept", "application/json")
+
+    # Construct URL
+    _url = "/api/v1/topic_suggestions/{id}/statistics"
+    path_format_arguments = {
+        "id": _SERIALIZER.url("id", id, "str"),
+    }
+
+    _url: str = _url.format(**path_format_arguments)  # type: ignore
+
+    # Construct headers
+    if authorization is not None:
+        _headers["Authorization"] = _SERIALIZER.header("authorization", authorization, "str")
+    _headers["Accept"] = _SERIALIZER.header("accept", accept, "str")
+
+    return HttpRequest(method="GET", url=_url, headers=_headers, **kwargs)
+
+
+def build_context_api_suggested_topic_statistics_request(  # pylint: disable=name-too-long
+    id: str,
     *,
-    tenant_id: Optional[str] = None,
+    authorization: Optional[str] = None,
     start_time: Optional[str] = None,
     end_time: Optional[str] = None,
-    period: Optional[str] = None,
-    authorization: Optional[str] = None,
+    page: Optional[int] = None,
+    per_page: Optional[int] = None,
     **kwargs: Any
 ) -> HttpRequest:
     _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
@@ -228,17 +314,22 @@ def build_estimated_cost_request(
     accept = _headers.pop("Accept", "application/json")
 
     # Construct URL
-    _url = "/api/v1/conversations/series/estimated_cost"
+    _url = "/api/v1/topic_suggestions/{id}/conversations"
+    path_format_arguments = {
+        "id": _SERIALIZER.url("id", id, "str"),
+    }
+
+    _url: str = _url.format(**path_format_arguments)  # type: ignore
 
     # Construct parameters
-    if tenant_id is not None:
-        _params["tenant_id"] = _SERIALIZER.query("tenant_id", tenant_id, "str")
     if start_time is not None:
         _params["start_time"] = _SERIALIZER.query("start_time", start_time, "str")
     if end_time is not None:
         _params["end_time"] = _SERIALIZER.query("end_time", end_time, "str")
-    if period is not None:
-        _params["period"] = _SERIALIZER.query("period", period, "str")
+    if page is not None:
+        _params["page"] = _SERIALIZER.query("page", page, "int")
+    if per_page is not None:
+        _params["per_page"] = _SERIALIZER.query("per_page", per_page, "int")
 
     # Construct headers
     if authorization is not None:
@@ -299,116 +390,9 @@ def build_log_conversation_thread_request(*, authorization: Optional[str] = None
     return HttpRequest(method="POST", url=_url, headers=_headers, **kwargs)
 
 
-def build_suggested_topics_request(
-    *, authorization: Optional[str] = None, page: Optional[int] = None, per_page: Optional[int] = None, **kwargs: Any
-) -> HttpRequest:
-    _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
-    _params = case_insensitive_dict(kwargs.pop("params", {}) or {})
-
-    accept = _headers.pop("Accept", "application/json")
-
-    # Construct URL
-    _url = "/api/v1/topic_suggestions"
-
-    # Construct parameters
-    if page is not None:
-        _params["page"] = _SERIALIZER.query("page", page, "int")
-    if per_page is not None:
-        _params["per_page"] = _SERIALIZER.query("per_page", per_page, "int")
-
-    # Construct headers
-    if authorization is not None:
-        _headers["Authorization"] = _SERIALIZER.header("authorization", authorization, "str")
-    _headers["Accept"] = _SERIALIZER.header("accept", accept, "str")
-
-    return HttpRequest(method="GET", url=_url, params=_params, headers=_headers, **kwargs)
-
-
-def build_suggested_topic_conversations_request(  # pylint: disable=name-too-long
-    id: str, *, authorization: Optional[str] = None, **kwargs: Any
-) -> HttpRequest:
-    _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
-
-    accept = _headers.pop("Accept", "application/json")
-
-    # Construct URL
-    _url = "/api/v1/topic_suggestions/{id}/statistics"
-    path_format_arguments = {
-        "id": _SERIALIZER.url("id", id, "str"),
-    }
-
-    _url: str = _url.format(**path_format_arguments)  # type: ignore
-
-    # Construct headers
-    if authorization is not None:
-        _headers["Authorization"] = _SERIALIZER.header("authorization", authorization, "str")
-    _headers["Accept"] = _SERIALIZER.header("accept", accept, "str")
-
-    return HttpRequest(method="GET", url=_url, headers=_headers, **kwargs)
-
-
-def build_suggested_topic_statistics_request(
-    id: str,
-    *,
-    authorization: Optional[str] = None,
-    start_time: Optional[str] = None,
-    end_time: Optional[str] = None,
-    page: Optional[int] = None,
-    per_page: Optional[int] = None,
-    **kwargs: Any
-) -> HttpRequest:
-    _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
-    _params = case_insensitive_dict(kwargs.pop("params", {}) or {})
-
-    accept = _headers.pop("Accept", "application/json")
-
-    # Construct URL
-    _url = "/api/v1/topic_suggestions/{id}/conversations"
-    path_format_arguments = {
-        "id": _SERIALIZER.url("id", id, "str"),
-    }
-
-    _url: str = _url.format(**path_format_arguments)  # type: ignore
-
-    # Construct parameters
-    if start_time is not None:
-        _params["start_time"] = _SERIALIZER.query("start_time", start_time, "str")
-    if end_time is not None:
-        _params["end_time"] = _SERIALIZER.query("end_time", end_time, "str")
-    if page is not None:
-        _params["page"] = _SERIALIZER.query("page", page, "int")
-    if per_page is not None:
-        _params["per_page"] = _SERIALIZER.query("per_page", per_page, "int")
-
-    # Construct headers
-    if authorization is not None:
-        _headers["Authorization"] = _SERIALIZER.header("authorization", authorization, "str")
-    _headers["Accept"] = _SERIALIZER.header("accept", accept, "str")
-
-    return HttpRequest(method="GET", url=_url, params=_params, headers=_headers, **kwargs)
-
-
-class ConversationOperations:
-    """
-    .. warning::
-        **DO NOT** instantiate this class directly.
-
-        Instead, you should access the following operations through
-        :class:`~context_api.ContextAPI`'s
-        :attr:`conversation` attribute.
-    """
-
-    models = _models
-
-    def __init__(self, *args, **kwargs):
-        input_args = list(args)
-        self._client = input_args.pop(0) if input_args else kwargs.pop("client")
-        self._config = input_args.pop(0) if input_args else kwargs.pop("config")
-        self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
-        self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
-
+class ContextAPIOperationsMixin(ContextAPIMixinABC):
     @distributed_trace
-    def series(
+    def conversation_series(
         self, *, authorization: Optional[str] = None, **kwargs: Any
     ) -> _models.PathsPixtmzApiV1ConversationsSeriesGetResponses200ContentApplicationJsonSchema:
         """Returns index of series.
@@ -437,7 +421,7 @@ class ConversationOperations:
             _models.PathsPixtmzApiV1ConversationsSeriesGetResponses200ContentApplicationJsonSchema
         ] = kwargs.pop("cls", None)
 
-        _request = build_conversation_series_request(
+        _request = build_context_api_conversation_series_request(
             authorization=authorization,
             headers=_headers,
             params=_params,
@@ -466,8 +450,6 @@ class ConversationOperations:
 
         return deserialized  # type: ignore
 
-
-class ContextAPIOperationsMixin(ContextAPIMixinABC):
     @distributed_trace
     def sentiment(
         self,
@@ -625,6 +607,89 @@ class ContextAPIOperationsMixin(ContextAPIMixinABC):
 
         deserialized = self._deserialize(
             "PathsXq2NqjApiV1ConversationsSeriesRatingGetResponses200ContentApplicationJsonSchema", pipeline_response
+        )
+
+        if cls:
+            return cls(pipeline_response, deserialized, {})  # type: ignore
+
+        return deserialized  # type: ignore
+
+    @distributed_trace
+    def estimated_cost(
+        self,
+        *,
+        tenant_id: Optional[str] = None,
+        start_time: Optional[str] = None,
+        end_time: Optional[str] = None,
+        period: Optional[str] = None,
+        authorization: Optional[str] = None,
+        **kwargs: Any
+    ) -> _models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema:
+        """Returns estimated cost details.
+
+        Returns estimated cost details.
+
+        :keyword tenant_id: Filter by tenant id.:code:`<br />`. Default value is None.
+        :paramtype tenant_id: str
+        :keyword start_time: Limits scope to data that occurred after given time.:code:`<br />`Must be
+         ISO 8601. Defaults to the beginning of 6 days ago.:code:`<br />`. Default value is None.
+        :paramtype start_time: str
+        :keyword end_time: Limits scope to data that occurred before given time.:code:`<br />`Must be
+         ISO 8601. Defaults to now.:code:`<br />`. Default value is None.
+        :paramtype end_time: str
+        :keyword period: Period to group data by. Defaults to day. Options are: day, week,
+         month.:code:`<br />`. Default value is None.
+        :paramtype period: str
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :return:
+         Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+        :rtype:
+         ~context_api.models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+        error_map = {
+            401: ClientAuthenticationError,
+            404: ResourceNotFoundError,
+            409: ResourceExistsError,
+            304: ResourceNotModifiedError,
+        }
+        error_map.update(kwargs.pop("error_map", {}) or {})
+
+        _headers = kwargs.pop("headers", {}) or {}
+        _params = kwargs.pop("params", {}) or {}
+
+        cls: ClsType[
+            _models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+        ] = kwargs.pop("cls", None)
+
+        _request = build_context_api_estimated_cost_request(
+            tenant_id=tenant_id,
+            start_time=start_time,
+            end_time=end_time,
+            period=period,
+            authorization=authorization,
+            headers=_headers,
+            params=_params,
+        )
+        _request.url = self._client.format_url(_request.url)
+
+        _stream = False
+        pipeline_response: PipelineResponse = self._client._pipeline.run(  # pylint: disable=protected-access
+            _request, stream=_stream, **kwargs
+        )
+
+        response = pipeline_response.http_response
+
+        if response.status_code not in [200]:
+            if _stream:
+                response.read()  # Load the body in memory and close the socket
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            raise HttpResponseError(response=response)
+
+        deserialized = self._deserialize(
+            "Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema",
+            pipeline_response,
         )
 
         if cls:
@@ -857,58 +922,94 @@ class ContextAPIOperationsMixin(ContextAPIMixinABC):
 
         return deserialized  # type: ignore
 
-
-class EstimatedOperations:
-    """
-    .. warning::
-        **DO NOT** instantiate this class directly.
-
-        Instead, you should access the following operations through
-        :class:`~context_api.ContextAPI`'s
-        :attr:`estimated` attribute.
-    """
-
-    models = _models
-
-    def __init__(self, *args, **kwargs):
-        input_args = list(args)
-        self._client = input_args.pop(0) if input_args else kwargs.pop("client")
-        self._config = input_args.pop(0) if input_args else kwargs.pop("config")
-        self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
-        self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
-
     @distributed_trace
-    def cost(
+    def suggested_topics(
         self,
         *,
-        tenant_id: Optional[str] = None,
-        start_time: Optional[str] = None,
-        end_time: Optional[str] = None,
-        period: Optional[str] = None,
         authorization: Optional[str] = None,
+        page: Optional[int] = None,
+        per_page: Optional[int] = None,
         **kwargs: Any
-    ) -> _models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema:
-        """Returns estimated cost details.
+    ) -> _models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema:
+        """Returns suggested topics details.
 
-        Returns estimated cost details.
+        Returns suggested topics details.
 
-        :keyword tenant_id: Filter by tenant id.:code:`<br />`. Default value is None.
-        :paramtype tenant_id: str
-        :keyword start_time: Limits scope to data that occurred after given time.:code:`<br />`Must be
-         ISO 8601. Defaults to the beginning of 6 days ago.:code:`<br />`. Default value is None.
-        :paramtype start_time: str
-        :keyword end_time: Limits scope to data that occurred before given time.:code:`<br />`Must be
-         ISO 8601. Defaults to now.:code:`<br />`. Default value is None.
-        :paramtype end_time: str
-        :keyword period: Period to group data by. Defaults to day. Options are: day, week,
-         month.:code:`<br />`. Default value is None.
-        :paramtype period: str
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :keyword page: Page number of results to return. Defaults to 1.:code:`<br />`. Default value is
+         None.
+        :paramtype page: int
+        :keyword per_page: Number of results to return per page. Defaults to 20.:code:`<br />`. Default
+         value is None.
+        :paramtype per_page: int
+        :return: Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema
+        :rtype:
+         ~context_api.models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+        error_map = {
+            401: ClientAuthenticationError,
+            404: ResourceNotFoundError,
+            409: ResourceExistsError,
+            304: ResourceNotModifiedError,
+        }
+        error_map.update(kwargs.pop("error_map", {}) or {})
+
+        _headers = kwargs.pop("headers", {}) or {}
+        _params = kwargs.pop("params", {}) or {}
+
+        cls: ClsType[_models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema] = kwargs.pop(
+            "cls", None
+        )
+
+        _request = build_context_api_suggested_topics_request(
+            authorization=authorization,
+            page=page,
+            per_page=per_page,
+            headers=_headers,
+            params=_params,
+        )
+        _request.url = self._client.format_url(_request.url)
+
+        _stream = False
+        pipeline_response: PipelineResponse = self._client._pipeline.run(  # pylint: disable=protected-access
+            _request, stream=_stream, **kwargs
+        )
+
+        response = pipeline_response.http_response
+
+        if response.status_code not in [200]:
+            if _stream:
+                response.read()  # Load the body in memory and close the socket
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            raise HttpResponseError(response=response)
+
+        deserialized = self._deserialize(
+            "Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema", pipeline_response
+        )
+
+        if cls:
+            return cls(pipeline_response, deserialized, {})  # type: ignore
+
+        return deserialized  # type: ignore
+
+    @distributed_trace
+    def suggested_topic_conversations(
+        self, id: str, *, authorization: Optional[str] = None, **kwargs: Any
+    ) -> _models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema:
+        """Returns statistics of selected topic.
+
+        Returns statistics of selected topic.
+
+        :param id: Required.
+        :type id: str
         :keyword authorization: Default value is None.
         :paramtype authorization: str
         :return:
-         Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+         Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
         :rtype:
-         ~context_api.models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+         ~context_api.models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
         :raises ~azure.core.exceptions.HttpResponseError:
         """
         error_map = {
@@ -923,14 +1024,11 @@ class EstimatedOperations:
         _params = kwargs.pop("params", {}) or {}
 
         cls: ClsType[
-            _models.Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema
+            _models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
         ] = kwargs.pop("cls", None)
 
-        _request = build_estimated_cost_request(
-            tenant_id=tenant_id,
-            start_time=start_time,
-            end_time=end_time,
-            period=period,
+        _request = build_context_api_suggested_topic_conversations_request(
+            id=id,
             authorization=authorization,
             headers=_headers,
             params=_params,
@@ -951,7 +1049,96 @@ class EstimatedOperations:
             raise HttpResponseError(response=response)
 
         deserialized = self._deserialize(
-            "Paths1J9XfjaApiV1ConversationsSeriesEstimatedCostGetResponses200ContentApplicationJsonSchema",
+            "Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema",
+            pipeline_response,
+        )
+
+        if cls:
+            return cls(pipeline_response, deserialized, {})  # type: ignore
+
+        return deserialized  # type: ignore
+
+    @distributed_trace
+    def suggested_topic_statistics(
+        self,
+        id: str,
+        *,
+        authorization: Optional[str] = None,
+        start_time: Optional[str] = None,
+        end_time: Optional[str] = None,
+        page: Optional[int] = None,
+        per_page: Optional[int] = None,
+        **kwargs: Any
+    ) -> _models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema:
+        """Returns a list of conversations matching given topic.
+
+        Returns a list of conversations matching given topic.
+
+        :param id: Required.
+        :type id: str
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :keyword start_time: Limits returned conversations to those that occurred after given
+         time.:code:`<br />`Must be ISO 8601. Defaults to the beginning of 6 days ago.:code:`<br />`.
+         Default value is None.
+        :paramtype start_time: str
+        :keyword end_time: Limits returned conversations to those that occurred before given
+         time.:code:`<br />`Must be ISO 8601. Defaults to now.:code:`<br />`. Default value is None.
+        :paramtype end_time: str
+        :keyword page: Page number of results to return. Defaults to 1.:code:`<br />`. Default value is
+         None.
+        :paramtype page: int
+        :keyword per_page: Number of results to return per page. Defaults to 20.:code:`<br />`. Default
+         value is None.
+        :paramtype per_page: int
+        :return:
+         Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
+        :rtype:
+         ~context_api.models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+        error_map = {
+            401: ClientAuthenticationError,
+            404: ResourceNotFoundError,
+            409: ResourceExistsError,
+            304: ResourceNotModifiedError,
+        }
+        error_map.update(kwargs.pop("error_map", {}) or {})
+
+        _headers = kwargs.pop("headers", {}) or {}
+        _params = kwargs.pop("params", {}) or {}
+
+        cls: ClsType[
+            _models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
+        ] = kwargs.pop("cls", None)
+
+        _request = build_context_api_suggested_topic_statistics_request(
+            id=id,
+            authorization=authorization,
+            start_time=start_time,
+            end_time=end_time,
+            page=page,
+            per_page=per_page,
+            headers=_headers,
+            params=_params,
+        )
+        _request.url = self._client.format_url(_request.url)
+
+        _stream = False
+        pipeline_response: PipelineResponse = self._client._pipeline.run(  # pylint: disable=protected-access
+            _request, stream=_stream, **kwargs
+        )
+
+        response = pipeline_response.http_response
+
+        if response.status_code not in [200]:
+            if _stream:
+                response.read()  # Load the body in memory and close the socket
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            raise HttpResponseError(response=response)
+
+        deserialized = self._deserialize(
+            "Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema",
             pipeline_response,
         )
 
@@ -1385,251 +1572,6 @@ class LogOperations:
 
         deserialized = self._deserialize(
             "PathsDo7Pm8ApiV1LogConversationThreadPostResponses201ContentApplicationJsonSchema", pipeline_response
-        )
-
-        if cls:
-            return cls(pipeline_response, deserialized, {})  # type: ignore
-
-        return deserialized  # type: ignore
-
-
-class SuggestedOperations:
-    """
-    .. warning::
-        **DO NOT** instantiate this class directly.
-
-        Instead, you should access the following operations through
-        :class:`~context_api.ContextAPI`'s
-        :attr:`suggested` attribute.
-    """
-
-    models = _models
-
-    def __init__(self, *args, **kwargs):
-        input_args = list(args)
-        self._client = input_args.pop(0) if input_args else kwargs.pop("client")
-        self._config = input_args.pop(0) if input_args else kwargs.pop("config")
-        self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
-        self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
-
-    @distributed_trace
-    def topics(
-        self,
-        *,
-        authorization: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        **kwargs: Any
-    ) -> _models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema:
-        """Returns suggested topics details.
-
-        Returns suggested topics details.
-
-        :keyword authorization: Default value is None.
-        :paramtype authorization: str
-        :keyword page: Page number of results to return. Defaults to 1.:code:`<br />`. Default value is
-         None.
-        :paramtype page: int
-        :keyword per_page: Number of results to return per page. Defaults to 20.:code:`<br />`. Default
-         value is None.
-        :paramtype per_page: int
-        :return: Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema
-        :rtype:
-         ~context_api.models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema
-        :raises ~azure.core.exceptions.HttpResponseError:
-        """
-        error_map = {
-            401: ClientAuthenticationError,
-            404: ResourceNotFoundError,
-            409: ResourceExistsError,
-            304: ResourceNotModifiedError,
-        }
-        error_map.update(kwargs.pop("error_map", {}) or {})
-
-        _headers = kwargs.pop("headers", {}) or {}
-        _params = kwargs.pop("params", {}) or {}
-
-        cls: ClsType[_models.Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema] = kwargs.pop(
-            "cls", None
-        )
-
-        _request = build_suggested_topics_request(
-            authorization=authorization,
-            page=page,
-            per_page=per_page,
-            headers=_headers,
-            params=_params,
-        )
-        _request.url = self._client.format_url(_request.url)
-
-        _stream = False
-        pipeline_response: PipelineResponse = self._client._pipeline.run(  # pylint: disable=protected-access
-            _request, stream=_stream, **kwargs
-        )
-
-        response = pipeline_response.http_response
-
-        if response.status_code not in [200]:
-            if _stream:
-                response.read()  # Load the body in memory and close the socket
-            map_error(status_code=response.status_code, response=response, error_map=error_map)
-            raise HttpResponseError(response=response)
-
-        deserialized = self._deserialize(
-            "Paths1U893W0ApiV1TopicSuggestionsGetResponses200ContentApplicationJsonSchema", pipeline_response
-        )
-
-        if cls:
-            return cls(pipeline_response, deserialized, {})  # type: ignore
-
-        return deserialized  # type: ignore
-
-    @distributed_trace
-    def topic_conversations(
-        self, id: str, *, authorization: Optional[str] = None, **kwargs: Any
-    ) -> _models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema:
-        """Returns statistics of selected topic.
-
-        Returns statistics of selected topic.
-
-        :param id: Required.
-        :type id: str
-        :keyword authorization: Default value is None.
-        :paramtype authorization: str
-        :return:
-         Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
-        :rtype:
-         ~context_api.models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
-        :raises ~azure.core.exceptions.HttpResponseError:
-        """
-        error_map = {
-            401: ClientAuthenticationError,
-            404: ResourceNotFoundError,
-            409: ResourceExistsError,
-            304: ResourceNotModifiedError,
-        }
-        error_map.update(kwargs.pop("error_map", {}) or {})
-
-        _headers = kwargs.pop("headers", {}) or {}
-        _params = kwargs.pop("params", {}) or {}
-
-        cls: ClsType[
-            _models.Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema
-        ] = kwargs.pop("cls", None)
-
-        _request = build_suggested_topic_conversations_request(
-            id=id,
-            authorization=authorization,
-            headers=_headers,
-            params=_params,
-        )
-        _request.url = self._client.format_url(_request.url)
-
-        _stream = False
-        pipeline_response: PipelineResponse = self._client._pipeline.run(  # pylint: disable=protected-access
-            _request, stream=_stream, **kwargs
-        )
-
-        response = pipeline_response.http_response
-
-        if response.status_code not in [200]:
-            if _stream:
-                response.read()  # Load the body in memory and close the socket
-            map_error(status_code=response.status_code, response=response, error_map=error_map)
-            raise HttpResponseError(response=response)
-
-        deserialized = self._deserialize(
-            "Paths11Gsqt2ApiV1TopicSuggestionsIdStatisticsGetResponses200ContentApplicationJsonSchema",
-            pipeline_response,
-        )
-
-        if cls:
-            return cls(pipeline_response, deserialized, {})  # type: ignore
-
-        return deserialized  # type: ignore
-
-    @distributed_trace
-    def topic_statistics(
-        self,
-        id: str,
-        *,
-        authorization: Optional[str] = None,
-        start_time: Optional[str] = None,
-        end_time: Optional[str] = None,
-        page: Optional[int] = None,
-        per_page: Optional[int] = None,
-        **kwargs: Any
-    ) -> _models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema:
-        """Returns a list of conversations matching given topic.
-
-        Returns a list of conversations matching given topic.
-
-        :param id: Required.
-        :type id: str
-        :keyword authorization: Default value is None.
-        :paramtype authorization: str
-        :keyword start_time: Limits returned conversations to those that occurred after given
-         time.:code:`<br />`Must be ISO 8601. Defaults to the beginning of 6 days ago.:code:`<br />`.
-         Default value is None.
-        :paramtype start_time: str
-        :keyword end_time: Limits returned conversations to those that occurred before given
-         time.:code:`<br />`Must be ISO 8601. Defaults to now.:code:`<br />`. Default value is None.
-        :paramtype end_time: str
-        :keyword page: Page number of results to return. Defaults to 1.:code:`<br />`. Default value is
-         None.
-        :paramtype page: int
-        :keyword per_page: Number of results to return per page. Defaults to 20.:code:`<br />`. Default
-         value is None.
-        :paramtype per_page: int
-        :return:
-         Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
-        :rtype:
-         ~context_api.models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
-        :raises ~azure.core.exceptions.HttpResponseError:
-        """
-        error_map = {
-            401: ClientAuthenticationError,
-            404: ResourceNotFoundError,
-            409: ResourceExistsError,
-            304: ResourceNotModifiedError,
-        }
-        error_map.update(kwargs.pop("error_map", {}) or {})
-
-        _headers = kwargs.pop("headers", {}) or {}
-        _params = kwargs.pop("params", {}) or {}
-
-        cls: ClsType[
-            _models.Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema
-        ] = kwargs.pop("cls", None)
-
-        _request = build_suggested_topic_statistics_request(
-            id=id,
-            authorization=authorization,
-            start_time=start_time,
-            end_time=end_time,
-            page=page,
-            per_page=per_page,
-            headers=_headers,
-            params=_params,
-        )
-        _request.url = self._client.format_url(_request.url)
-
-        _stream = False
-        pipeline_response: PipelineResponse = self._client._pipeline.run(  # pylint: disable=protected-access
-            _request, stream=_stream, **kwargs
-        )
-
-        response = pipeline_response.http_response
-
-        if response.status_code not in [200]:
-            if _stream:
-                response.read()  # Load the body in memory and close the socket
-            map_error(status_code=response.status_code, response=response, error_map=error_map)
-            raise HttpResponseError(response=response)
-
-        deserialized = self._deserialize(
-            "Paths1TzwckqApiV1TopicSuggestionsIdConversationsGetResponses200ContentApplicationJsonSchema",
-            pipeline_response,
         )
 
         if cls:
