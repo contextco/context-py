@@ -390,6 +390,32 @@ def build_log_conversation_thread_request(*, authorization: Optional[str] = None
     return HttpRequest(method="POST", url=_url, headers=_headers, **kwargs)
 
 
+def build_test_sets_request(
+    *, authorization: Optional[str] = None, copy_test_cases_from: Optional[str] = None, **kwargs: Any
+) -> HttpRequest:
+    _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
+    _params = case_insensitive_dict(kwargs.pop("params", {}) or {})
+
+    content_type: Optional[str] = kwargs.pop("content_type", _headers.pop("Content-Type", None))
+    accept = _headers.pop("Accept", "application/json")
+
+    # Construct URL
+    _url = "/api/v1/test_sets"
+
+    # Construct parameters
+    if copy_test_cases_from is not None:
+        _params["copy_test_cases_from"] = _SERIALIZER.query("copy_test_cases_from", copy_test_cases_from, "str")
+
+    # Construct headers
+    if authorization is not None:
+        _headers["Authorization"] = _SERIALIZER.header("authorization", authorization, "str")
+    if content_type is not None:
+        _headers["Content-Type"] = _SERIALIZER.header("content_type", content_type, "str")
+    _headers["Accept"] = _SERIALIZER.header("accept", accept, "str")
+
+    return HttpRequest(method="POST", url=_url, params=_params, headers=_headers, **kwargs)
+
+
 class ContextAPIOperationsMixin(ContextAPIMixinABC):
     @distributed_trace
     def conversation_series(
@@ -1573,6 +1599,170 @@ class LogOperations:
         deserialized = self._deserialize(
             "PathsDo7Pm8ApiV1LogConversationThreadPostResponses201ContentApplicationJsonSchema", pipeline_response
         )
+
+        if cls:
+            return cls(pipeline_response, deserialized, {})  # type: ignore
+
+        return deserialized  # type: ignore
+
+
+class TestOperations:
+    """
+    .. warning::
+        **DO NOT** instantiate this class directly.
+
+        Instead, you should access the following operations through
+        :class:`~context_api.ContextAPI`'s
+        :attr:`test` attribute.
+    """
+
+    models = _models
+
+    def __init__(self, *args, **kwargs):
+        input_args = list(args)
+        self._client = input_args.pop(0) if input_args else kwargs.pop("client")
+        self._config = input_args.pop(0) if input_args else kwargs.pop("config")
+        self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
+        self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
+
+    @overload
+    def sets(
+        self,
+        body: Optional[_models.TestSetParams] = None,
+        *,
+        authorization: Optional[str] = None,
+        copy_test_cases_from: Optional[str] = None,
+        content_type: str = "application/json",
+        **kwargs: Any
+    ) -> _models.TestSet:
+        """Returns test set and version details.
+
+        Returns test set and version details.
+
+        :param body: Default value is None.
+        :type body: ~context_api.models.TestSetParams
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :keyword copy_test_cases_from: If none, all test cases will be replaced with the ones provided
+         in the request.:code:`<br />`If prior_version, only the test cases with the same name will be
+         replaced and new test cases will be appended.:code:`<br />`. Default value is None.
+        :paramtype copy_test_cases_from: str
+        :keyword content_type: Body Parameter content-type. Content type parameter for JSON body.
+         Default value is "application/json".
+        :paramtype content_type: str
+        :return: TestSet
+        :rtype: ~context_api.models.TestSet
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+
+    @overload
+    def sets(
+        self,
+        body: Optional[IO] = None,
+        *,
+        authorization: Optional[str] = None,
+        copy_test_cases_from: Optional[str] = None,
+        content_type: str = "application/json",
+        **kwargs: Any
+    ) -> _models.TestSet:
+        """Returns test set and version details.
+
+        Returns test set and version details.
+
+        :param body: Default value is None.
+        :type body: IO
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :keyword copy_test_cases_from: If none, all test cases will be replaced with the ones provided
+         in the request.:code:`<br />`If prior_version, only the test cases with the same name will be
+         replaced and new test cases will be appended.:code:`<br />`. Default value is None.
+        :paramtype copy_test_cases_from: str
+        :keyword content_type: Body Parameter content-type. Content type parameter for binary body.
+         Default value is "application/json".
+        :paramtype content_type: str
+        :return: TestSet
+        :rtype: ~context_api.models.TestSet
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+
+    @distributed_trace
+    def sets(
+        self,
+        body: Optional[Union[_models.TestSetParams, IO]] = None,
+        *,
+        authorization: Optional[str] = None,
+        copy_test_cases_from: Optional[str] = None,
+        **kwargs: Any
+    ) -> _models.TestSet:
+        """Returns test set and version details.
+
+        Returns test set and version details.
+
+        :param body: Is either a TestSetParams type or a IO type. Default value is None.
+        :type body: ~context_api.models.TestSetParams or IO
+        :keyword authorization: Default value is None.
+        :paramtype authorization: str
+        :keyword copy_test_cases_from: If none, all test cases will be replaced with the ones provided
+         in the request.:code:`<br />`If prior_version, only the test cases with the same name will be
+         replaced and new test cases will be appended.:code:`<br />`. Default value is None.
+        :paramtype copy_test_cases_from: str
+        :keyword content_type: Body Parameter content-type. Known values are: 'application/json'.
+         Default value is None.
+        :paramtype content_type: str
+        :return: TestSet
+        :rtype: ~context_api.models.TestSet
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+        error_map = {
+            401: ClientAuthenticationError,
+            404: ResourceNotFoundError,
+            409: ResourceExistsError,
+            304: ResourceNotModifiedError,
+        }
+        error_map.update(kwargs.pop("error_map", {}) or {})
+
+        _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
+        _params = kwargs.pop("params", {}) or {}
+
+        content_type: Optional[str] = kwargs.pop("content_type", _headers.pop("Content-Type", None))
+        cls: ClsType[_models.TestSet] = kwargs.pop("cls", None)
+
+        content_type = content_type or "application/json"
+        _json = None
+        _content = None
+        if isinstance(body, (IOBase, bytes)):
+            _content = body
+        else:
+            if body is not None:
+                _json = self._serialize.body(body, "TestSetParams")
+            else:
+                _json = None
+
+        _request = build_test_sets_request(
+            authorization=authorization,
+            copy_test_cases_from=copy_test_cases_from,
+            content_type=content_type,
+            json=_json,
+            content=_content,
+            headers=_headers,
+            params=_params,
+        )
+        _request.url = self._client.format_url(_request.url)
+
+        _stream = False
+        pipeline_response: PipelineResponse = self._client._pipeline.run(  # pylint: disable=protected-access
+            _request, stream=_stream, **kwargs
+        )
+
+        response = pipeline_response.http_response
+
+        if response.status_code not in [201]:
+            if _stream:
+                response.read()  # Load the body in memory and close the socket
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            raise HttpResponseError(response=response)
+
+        deserialized = self._deserialize("TestSet", pipeline_response)
 
         if cls:
             return cls(pipeline_response, deserialized, {})  # type: ignore

@@ -55,3 +55,11 @@ class Rating(int, Enum, metaclass=CaseInsensitiveEnumMeta):
     """Neutral"""
     POSITIVE = 1
     """Positive"""
+
+
+class TestCaseMessageRole(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """TestCaseMessageRole."""
+
+    SYSTEM = "system"
+    ASSISTANT = "assistant"
+    USER = "user"

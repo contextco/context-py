@@ -27,6 +27,10 @@ from ._models import PathsRai0VpApiV1LogConversationUpsertPostRequestbodyContent
 from ._models import PathsXq2NqjApiV1ConversationsSeriesRatingGetResponses200ContentApplicationJsonSchema
 from ._models import PathsY5Azv9ApiV1ConversationsGetResponses200ContentApplicationJsonSchema
 from ._models import SeriesItem
+from ._models import TestCase
+from ._models import TestCaseMessage
+from ._models import TestSet
+from ._models import TestSetParams
 from ._models import Thread
 from ._models import Topic
 from ._models import TopicWithSamples
@@ -37,6 +41,7 @@ from ._enums import MessageParamsType
 from ._enums import MessageRole
 from ._enums import MessageType
 from ._enums import Rating
+from ._enums import TestCaseMessageRole
 from ._patch import __all__ as _patch_all
 from ._patch import *  # pylint: disable=unused-wildcard-import
 from ._patch import patch_sdk as _patch_sdk
@@ -63,6 +68,10 @@ __all__ = [
     "PathsXq2NqjApiV1ConversationsSeriesRatingGetResponses200ContentApplicationJsonSchema",
     "PathsY5Azv9ApiV1ConversationsGetResponses200ContentApplicationJsonSchema",
     "SeriesItem",
+    "TestCase",
+    "TestCaseMessage",
+    "TestSet",
+    "TestSetParams",
     "Thread",
     "Topic",
     "TopicWithSamples",
@@ -72,6 +81,7 @@ __all__ = [
     "MessageRole",
     "MessageType",
     "Rating",
+    "TestCaseMessageRole",
 ]
 __all__.extend([p for p in _patch_all if p not in __all__])
 _patch_sdk()
