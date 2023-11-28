@@ -1038,6 +1038,145 @@ class SeriesItem(_serialization.Model):
         self.data = data
 
 
+class TestCase(_serialization.Model):
+    """TestCase.
+
+    All required parameters must be populated in order to send to server.
+
+    :ivar name: Required.
+    :vartype name: str
+    :ivar model: Required.
+    :vartype model: str
+    :ivar messages: Required.
+    :vartype messages: list[~context_api.models.TestCaseMessage]
+    """
+
+    _validation = {
+        "name": {"required": True},
+        "model": {"required": True},
+        "messages": {"required": True},
+    }
+
+    _attribute_map = {
+        "name": {"key": "name", "type": "str"},
+        "model": {"key": "model", "type": "str"},
+        "messages": {"key": "messages", "type": "[TestCaseMessage]"},
+    }
+
+    def __init__(self, *, name: str, model: str, messages: List["_models.TestCaseMessage"], **kwargs: Any) -> None:
+        """
+        :keyword name: Required.
+        :paramtype name: str
+        :keyword model: Required.
+        :paramtype model: str
+        :keyword messages: Required.
+        :paramtype messages: list[~context_api.models.TestCaseMessage]
+        """
+        super().__init__(**kwargs)
+        self.name = name
+        self.model = model
+        self.messages = messages
+
+
+class TestCaseMessage(_serialization.Model):
+    """TestCaseMessage.
+
+    All required parameters must be populated in order to send to server.
+
+    :ivar message: Required.
+    :vartype message: str
+    :ivar role: Required. Known values are: "system", "assistant", and "user".
+    :vartype role: str or ~context_api.models.TestCaseMessageRole
+    """
+
+    _validation = {
+        "message": {"required": True},
+        "role": {"required": True},
+    }
+
+    _attribute_map = {
+        "message": {"key": "message", "type": "str"},
+        "role": {"key": "role", "type": "str"},
+    }
+
+    def __init__(self, *, message: str, role: Union[str, "_models.TestCaseMessageRole"], **kwargs: Any) -> None:
+        """
+        :keyword message: Required.
+        :paramtype message: str
+        :keyword role: Required. Known values are: "system", "assistant", and "user".
+        :paramtype role: str or ~context_api.models.TestCaseMessageRole
+        """
+        super().__init__(**kwargs)
+        self.message = message
+        self.role = role
+
+
+class TestSet(_serialization.Model):
+    """TestSet.
+
+    All required parameters must be populated in order to send to server.
+
+    :ivar name: Required.
+    :vartype name: str
+    :ivar version_id: Required.
+    :vartype version_id: float
+    """
+
+    _validation = {
+        "name": {"required": True},
+        "version_id": {"required": True},
+    }
+
+    _attribute_map = {
+        "name": {"key": "name", "type": "str"},
+        "version_id": {"key": "version_id", "type": "float"},
+    }
+
+    def __init__(self, *, name: str, version_id: float, **kwargs: Any) -> None:
+        """
+        :keyword name: Required.
+        :paramtype name: str
+        :keyword version_id: Required.
+        :paramtype version_id: float
+        """
+        super().__init__(**kwargs)
+        self.name = name
+        self.version_id = version_id
+
+
+class TestSetParams(_serialization.Model):
+    """TestSetParams.
+
+    All required parameters must be populated in order to send to server.
+
+    :ivar name: Required.
+    :vartype name: str
+    :ivar test_cases: Required.
+    :vartype test_cases: list[~context_api.models.TestCase]
+    """
+
+    _validation = {
+        "name": {"required": True},
+        "test_cases": {"required": True},
+    }
+
+    _attribute_map = {
+        "name": {"key": "name", "type": "str"},
+        "test_cases": {"key": "test_cases", "type": "[TestCase]"},
+    }
+
+    def __init__(self, *, name: str, test_cases: List["_models.TestCase"], **kwargs: Any) -> None:
+        """
+        :keyword name: Required.
+        :paramtype name: str
+        :keyword test_cases: Required.
+        :paramtype test_cases: list[~context_api.models.TestCase]
+        """
+        super().__init__(**kwargs)
+        self.name = name
+        self.test_cases = test_cases
+
+
 class Thread(_serialization.Model):
     """Thread.
 

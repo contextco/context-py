@@ -14,7 +14,7 @@ from azure.core.rest import AsyncHttpResponse, HttpRequest
 from .. import models as _models
 from .._serialization import Deserializer, Serializer
 from ._configuration import ContextAPIConfiguration
-from .operations import ContextAPIOperationsMixin, LogOperations
+from .operations import ContextAPIOperationsMixin, LogOperations, TestOperations
 
 if TYPE_CHECKING:
     # pylint: disable=unused-import,ungrouped-imports
@@ -26,6 +26,8 @@ class ContextAPI(ContextAPIOperationsMixin):  # pylint: disable=client-accepts-a
 
     :ivar log: LogOperations operations
     :vartype log: context_api.aio.operations.LogOperations
+    :ivar test: TestOperations operations
+    :vartype test: context_api.aio.operations.TestOperations
     :param credential: Credential needed for the client to connect to Azure. Required.
     :type credential: ~azure.core.credentials_async.AsyncTokenCredential
     :keyword endpoint: Service URL. Default value is "https://api.context.ai".
@@ -60,6 +62,7 @@ class ContextAPI(ContextAPIOperationsMixin):  # pylint: disable=client-accepts-a
         self._deserialize = Deserializer(client_models)
         self._serialize.client_side_validation = False
         self.log = LogOperations(self._client, self._config, self._serialize, self._deserialize)
+        self.test = TestOperations(self._client, self._config, self._serialize, self._deserialize)
 
     def send_request(
         self, request: HttpRequest, *, stream: bool = False, **kwargs: Any
