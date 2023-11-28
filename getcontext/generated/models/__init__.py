@@ -41,6 +41,7 @@ from ._enums import MessageParamsType
 from ._enums import MessageRole
 from ._enums import MessageType
 from ._enums import Rating
+from ._enums import TestCaseFrom
 from ._enums import TestCaseMessageRole
 from ._patch import __all__ as _patch_all
 from ._patch import *  # pylint: disable=unused-wildcard-import
@@ -81,6 +82,7 @@ __all__ = [
     "MessageRole",
     "MessageType",
     "Rating",
+    "TestCaseFrom",
     "TestCaseMessageRole",
 ]
 __all__.extend([p for p in _patch_all if p not in __all__])
