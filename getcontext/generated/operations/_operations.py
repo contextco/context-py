@@ -390,7 +390,7 @@ def build_log_conversation_thread_request(*, authorization: Optional[str] = None
     return HttpRequest(method="POST", url=_url, headers=_headers, **kwargs)
 
 
-def build_test_sets_request(
+def build_log_test_sets_request(
     *, authorization: Optional[str] = None, copy_test_cases_from: Optional[str] = None, **kwargs: Any
 ) -> HttpRequest:
     _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
@@ -1605,42 +1605,22 @@ class LogOperations:
 
         return deserialized  # type: ignore
 
-
-class TestOperations:
-    """
-    .. warning::
-        **DO NOT** instantiate this class directly.
-
-        Instead, you should access the following operations through
-        :class:`~context_api.ContextAPI`'s
-        :attr:`test` attribute.
-    """
-
-    models = _models
-
-    def __init__(self, *args, **kwargs):
-        input_args = list(args)
-        self._client = input_args.pop(0) if input_args else kwargs.pop("client")
-        self._config = input_args.pop(0) if input_args else kwargs.pop("config")
-        self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
-        self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
-
     @overload
-    def sets(
+    def test_sets(
         self,
-        body: Optional[_models.TestSetParams] = None,
+        body: Optional[_models.TestSet] = None,
         *,
         authorization: Optional[str] = None,
         copy_test_cases_from: Optional[str] = None,
         content_type: str = "application/json",
         **kwargs: Any
-    ) -> _models.TestSet:
+    ) -> _models.TestSetParams:
         """Returns test set and version details.
 
         Returns test set and version details.
 
         :param body: Default value is None.
-        :type body: ~context_api.models.TestSetParams
+        :type body: ~context_api.models.TestSet
         :keyword authorization: Default value is None.
         :paramtype authorization: str
         :keyword copy_test_cases_from: If none, all test cases will be replaced with the ones provided
@@ -1650,13 +1630,13 @@ class TestOperations:
         :keyword content_type: Body Parameter content-type. Content type parameter for JSON body.
          Default value is "application/json".
         :paramtype content_type: str
-        :return: TestSet
-        :rtype: ~context_api.models.TestSet
+        :return: TestSetParams
+        :rtype: ~context_api.models.TestSetParams
         :raises ~azure.core.exceptions.HttpResponseError:
         """
 
     @overload
-    def sets(
+    def test_sets(
         self,
         body: Optional[IO] = None,
         *,
@@ -1664,7 +1644,7 @@ class TestOperations:
         copy_test_cases_from: Optional[str] = None,
         content_type: str = "application/json",
         **kwargs: Any
-    ) -> _models.TestSet:
+    ) -> _models.TestSetParams:
         """Returns test set and version details.
 
         Returns test set and version details.
@@ -1680,26 +1660,26 @@ class TestOperations:
         :keyword content_type: Body Parameter content-type. Content type parameter for binary body.
          Default value is "application/json".
         :paramtype content_type: str
-        :return: TestSet
-        :rtype: ~context_api.models.TestSet
+        :return: TestSetParams
+        :rtype: ~context_api.models.TestSetParams
         :raises ~azure.core.exceptions.HttpResponseError:
         """
 
     @distributed_trace
-    def sets(
+    def test_sets(
         self,
-        body: Optional[Union[_models.TestSetParams, IO]] = None,
+        body: Optional[Union[_models.TestSet, IO]] = None,
         *,
         authorization: Optional[str] = None,
         copy_test_cases_from: Optional[str] = None,
         **kwargs: Any
-    ) -> _models.TestSet:
+    ) -> _models.TestSetParams:
         """Returns test set and version details.
 
         Returns test set and version details.
 
-        :param body: Is either a TestSetParams type or a IO type. Default value is None.
-        :type body: ~context_api.models.TestSetParams or IO
+        :param body: Is either a TestSet type or a IO type. Default value is None.
+        :type body: ~context_api.models.TestSet or IO
         :keyword authorization: Default value is None.
         :paramtype authorization: str
         :keyword copy_test_cases_from: If none, all test cases will be replaced with the ones provided
@@ -1709,8 +1689,8 @@ class TestOperations:
         :keyword content_type: Body Parameter content-type. Known values are: 'application/json'.
          Default value is None.
         :paramtype content_type: str
-        :return: TestSet
-        :rtype: ~context_api.models.TestSet
+        :return: TestSetParams
+        :rtype: ~context_api.models.TestSetParams
         :raises ~azure.core.exceptions.HttpResponseError:
         """
         error_map = {
@@ -1725,7 +1705,7 @@ class TestOperations:
         _params = kwargs.pop("params", {}) or {}
 
         content_type: Optional[str] = kwargs.pop("content_type", _headers.pop("Content-Type", None))
-        cls: ClsType[_models.TestSet] = kwargs.pop("cls", None)
+        cls: ClsType[_models.TestSetParams] = kwargs.pop("cls", None)
 
         content_type = content_type or "application/json"
         _json = None
@@ -1734,11 +1714,11 @@ class TestOperations:
             _content = body
         else:
             if body is not None:
-                _json = self._serialize.body(body, "TestSetParams")
+                _json = self._serialize.body(body, "TestSet")
             else:
                 _json = None
 
-        _request = build_test_sets_request(
+        _request = build_log_test_sets_request(
             authorization=authorization,
             copy_test_cases_from=copy_test_cases_from,
             content_type=content_type,
@@ -1762,7 +1742,7 @@ class TestOperations:
             map_error(status_code=response.status_code, response=response, error_map=error_map)
             raise HttpResponseError(response=response)
 
-        deserialized = self._deserialize("TestSet", pipeline_response)
+        deserialized = self._deserialize("TestSetParams", pipeline_response)
 
         if cls:
             return cls(pipeline_response, deserialized, {})  # type: ignore

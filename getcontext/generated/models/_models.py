@@ -1118,39 +1118,6 @@ class TestSet(_serialization.Model):
 
     :ivar name: Required.
     :vartype name: str
-    :ivar version_id: Required.
-    :vartype version_id: float
-    """
-
-    _validation = {
-        "name": {"required": True},
-        "version_id": {"required": True},
-    }
-
-    _attribute_map = {
-        "name": {"key": "name", "type": "str"},
-        "version_id": {"key": "version_id", "type": "float"},
-    }
-
-    def __init__(self, *, name: str, version_id: float, **kwargs: Any) -> None:
-        """
-        :keyword name: Required.
-        :paramtype name: str
-        :keyword version_id: Required.
-        :paramtype version_id: float
-        """
-        super().__init__(**kwargs)
-        self.name = name
-        self.version_id = version_id
-
-
-class TestSetParams(_serialization.Model):
-    """TestSetParams.
-
-    All required parameters must be populated in order to send to server.
-
-    :ivar name: Required.
-    :vartype name: str
     :ivar test_cases: Required.
     :vartype test_cases: list[~context_api.models.TestCase]
     """
@@ -1175,6 +1142,39 @@ class TestSetParams(_serialization.Model):
         super().__init__(**kwargs)
         self.name = name
         self.test_cases = test_cases
+
+
+class TestSetParams(_serialization.Model):
+    """TestSetParams.
+
+    All required parameters must be populated in order to send to server.
+
+    :ivar name: Required.
+    :vartype name: str
+    :ivar version_id: Required.
+    :vartype version_id: float
+    """
+
+    _validation = {
+        "name": {"required": True},
+        "version_id": {"required": True},
+    }
+
+    _attribute_map = {
+        "name": {"key": "name", "type": "str"},
+        "version_id": {"key": "version_id", "type": "float"},
+    }
+
+    def __init__(self, *, name: str, version_id: float, **kwargs: Any) -> None:
+        """
+        :keyword name: Required.
+        :paramtype name: str
+        :keyword version_id: Required.
+        :paramtype version_id: float
+        """
+        super().__init__(**kwargs)
+        self.name = name
+        self.version_id = version_id
 
 
 class Thread(_serialization.Model):

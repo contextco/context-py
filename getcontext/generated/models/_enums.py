@@ -57,6 +57,13 @@ class Rating(int, Enum, metaclass=CaseInsensitiveEnumMeta):
     """Positive"""
 
 
+class TestCaseFrom(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """TestCaseFrom."""
+
+    NONE = "none"
+    PRIOR_VERSION = "prior_version"
+
+
 class TestCaseMessageRole(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     """TestCaseMessageRole."""
 
