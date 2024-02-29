@@ -10,6 +10,7 @@ c = getcontext.ContextAPI(credential=Credential(token))
 c.log.conversation(
     body={
         "conversation": Conversation(
+            feedback="The agent resolved my query very fast - thank you!",
             messages=[
                 Message(
                     message="You are a helpful assistant!",
