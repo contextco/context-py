@@ -1740,8 +1740,8 @@ class VersionRunParams(_serialization.Model):
     :vartype test_set_name: str
     :ivar version: Required.
     :vartype version: int
-    :ivar iterations: Known values are: 3, 5, 7, and 1.
-    :vartype iterations: int or ~context_api.models.VersionRunParamsIterations
+    :ivar iterations:
+    :vartype iterations: int
     """
 
     _validation = {
@@ -1755,21 +1755,14 @@ class VersionRunParams(_serialization.Model):
         "iterations": {"key": "iterations", "type": "int"},
     }
 
-    def __init__(
-        self,
-        *,
-        test_set_name: str,
-        version: int,
-        iterations: Union[int, "_models.VersionRunParamsIterations"] = 1,
-        **kwargs: Any
-    ) -> None:
+    def __init__(self, *, test_set_name: str, version: int, iterations: int = 1, **kwargs: Any) -> None:
         """
         :keyword test_set_name: Required.
         :paramtype test_set_name: str
         :keyword version: Required.
         :paramtype version: int
-        :keyword iterations: Known values are: 3, 5, 7, and 1.
-        :paramtype iterations: int or ~context_api.models.VersionRunParamsIterations
+        :keyword iterations:
+        :paramtype iterations: int
         """
         super().__init__(**kwargs)
         self.test_set_name = test_set_name

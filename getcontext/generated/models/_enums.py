@@ -88,12 +88,3 @@ class TestCaseMessageRole(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     SYSTEM = "system"
     ASSISTANT = "assistant"
     USER = "user"
-
-
-class VersionRunParamsIterations(int, Enum, metaclass=CaseInsensitiveEnumMeta):
-    """VersionRunParamsIterations."""
-
-    THREE = 3
-    FIVE = 5
-    SEVEN = 7
-    ONE = 1

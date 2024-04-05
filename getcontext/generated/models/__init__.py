@@ -55,7 +55,6 @@ from ._enums import MessageType
 from ._enums import Rating
 from ._enums import TestCaseFrom
 from ._enums import TestCaseMessageRole
-from ._enums import VersionRunParamsIterations
 from ._patch import __all__ as _patch_all
 from ._patch import *  # pylint: disable=unused-wildcard-import
 from ._patch import patch_sdk as _patch_sdk
@@ -109,7 +108,6 @@ __all__ = [
     "Rating",
     "TestCaseFrom",
     "TestCaseMessageRole",
-    "VersionRunParamsIterations",
 ]
 __all__.extend([p for p in _patch_all if p not in __all__])
 _patch_sdk()
