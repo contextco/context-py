@@ -15,6 +15,9 @@ c.log.test_sets(
             TestCase(
                 name="Test Case 1",
                 model="gpt-4",
+                metadata={
+                    "user_id": "ff-09268hy98g-00123y"
+                },
                 messages=[
                     TestCaseMessage(
                         message="You are a super LLM agent.",
