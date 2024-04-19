@@ -6,6 +6,8 @@ from langsmith import traceable
 from getcontext.tracing._helpers import modified_environ
 from getcontext.tracing.trace import Trace
 
+# TASK: Try capture gloabl langsmith client, change on begin capture trace and end capture trace
+# Looks like clients try to connect on instantiation, unknown if there is a way to override this
 
 def capture_trace(func, *args, **kwargs):
     """
@@ -22,31 +24,40 @@ def capture_trace(func, *args, **kwargs):
     Raises:
         TypeError: If the given argument is not callable.
     """
-
     if not callable(func):
         raise TypeError("The given argument is not callable.")
 
-    parent_function_name = inspect.stack()[1].function
+    trace = None
 
-    @traceable(run_type='chain', name=parent_function_name)
-    def __user_function_wrapper(func, *args, **kwargs):
+    @traceable(run_type='chain', name=__find_test_parent_function_name())
+    def __user_function_wrapper(func, *args, **kwargs):     
+        nonlocal trace
         results = func(*args, **kwargs)
-        run_tree = get_current_run_tree()  # run_tree is only available while in a traceable context
+        run_tree = get_current_run_tree()
 
-        # We do not want to return run_tree or Trace() as this will be visible to the user in the UI
-        # TODO: find a better way of doing this...
-        Trace.HACKY_CONSTANT = Trace(results, run_tree)
+        trace = Trace(results, run_tree) 
 
     # run function with temporarily modified environmental variables
     with modified_environ(**__context_enviromental_variables()):
         __user_function_wrapper(func, *args, **kwargs)
 
-    return Trace.HACKY_CONSTANT
+    return trace
 
 
 def __context_enviromental_variables():
     return {
-        "LANGCHAIN_ENDPOINT": "http://api.localtest.me:3000/api/v1/evaluations/traces",
+        "LANGCHAIN_ENDPOINT": "http://api.localtest.me:3000/api/v1/evaluations/traces" if os.environ.get("CONTEXT_SDK_DEV") else "https://with.context.ai/api/v1/evaluations/traces",
         "LANGCHAIN_API_KEY": os.environ.get("GETCONTEXT_TOKEN"),
         "LANGCHAIN_TRACING_V2": "true",
     }
+
+
+def __find_test_parent_function_name():
+    # iterate through the stack to find the parent function name
+    for frame in inspect.stack():
+        function_name = frame.function.lower()
+
+        if function_name.startswith('test') or function_name.endswith('test'):
+            return frame.function
+        
+    raise ValueError("No test function found in stack. Make sure your test name starts or ends with 'test'.")
