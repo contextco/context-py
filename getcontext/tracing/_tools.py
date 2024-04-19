@@ -1,4 +1,5 @@
 import inspect
+import os
 
 from langsmith.run_helpers import get_current_run_tree
 from langsmith import traceable
@@ -46,6 +47,6 @@ def capture_trace(func, *args, **kwargs):
 def __context_enviromental_variables():
     return {
         "LANGCHAIN_ENDPOINT": "http://api.localtest.me:3000/api/v1/evaluations/traces",
-        "LANGCHAIN_API_KEY": "QaJAbqkNNiMS1ZnVMitV41q4",
+        "LANGCHAIN_API_KEY": os.environ.get("GETCONTEXT_TOKEN"),
         "LANGCHAIN_TRACING_V2": "true",
     }
