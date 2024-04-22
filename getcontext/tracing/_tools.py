@@ -9,8 +9,7 @@ from getcontext.tracing.trace import Trace
 # TASK: Try capture gloabl langsmith client, change on begin capture trace and end capture trace
 # Looks like clients try to connect on instantiation, unknown if there is a way to override this
 
-DEVELOPMENT_ENDPOINT = "http://api.localtest.me:3000/api/v1/evaluations/traces"
-PRODUCTION_ENDPOINT = "https://with.context.ai/api/v1/evaluations/traces"
+CONTEXT_TRACE_ENDPOINT = "https://with.context.ai/api/v1/evaluations/traces"
 
 
 def capture_trace(func, *args, **kwargs) -> Trace:
@@ -68,7 +67,7 @@ def __find_test_parent_function_name():
 
 
 def __context_endpoint():
-    return DEVELOPMENT_ENDPOINT if os.environ.get("CONTEXT_SDK_DEV") else PRODUCTION_ENDPOINT
+    return os.environ.get("CONTEXT_TRACE_ENDPOINT", CONTEXT_TRACE_ENDPOINT)
 
 
 def __context_API_key():
