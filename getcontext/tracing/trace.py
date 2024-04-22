@@ -1,7 +1,10 @@
 from langsmith.run_trees import RunTree
 
 
-class Trace:    
+class Trace:
+    # known key, which is interpreted on the server side
+    CONTEXT_AI_OPTIONS = "context_ai_options"
+    
     def __init__(self, result, run_tree: RunTree):
         self.result = result
         self.run_tree = run_tree
@@ -14,7 +17,7 @@ class Trace:
         langsmith_run = self._find_run(span_name)
         if langsmith_run.extra is None:
             langsmith_run.extra = {}
-        context_ai_options = langsmith_run.extra.setdefault("context_ai_options", {})
+        context_ai_options = langsmith_run.extra.setdefault(Trace.CONTEXT_AI_OPTIONS, {})
         evaluators_options = context_ai_options.setdefault("evaluators", [])
         evaluators_options.append(evaluator)
         
