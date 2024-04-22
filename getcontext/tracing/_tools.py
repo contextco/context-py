@@ -11,7 +11,7 @@ from getcontext.tracing.trace import Trace
 # TASK: Try capture gloabl langsmith client, change on begin capture trace and end capture trace
 # Looks like clients try to connect on instantiation, unknown if there is a way to override this
 
-CONTEXT_TRACE_ENDPOINT = "https://with.context.ai/api/v1/evaluations/traces"
+CONTEXT_TRACE_ENDPOINT = "https://api.context.ai/api/v1/evaluations/traces"
 
 
 def capture_trace(func, *args, **kwargs) -> Trace:
@@ -33,8 +33,9 @@ def capture_trace(func, *args, **kwargs) -> Trace:
         raise TypeError("The given argument is not callable.")
 
     trace = None
+    client = ls_client.Client(api_key=__context_API_key(), api_url=__context_endpoint())
 
-    @traceable(run_type='chain', name=__find_test_parent_function_name())
+    @traceable(run_type='chain', name=__find_test_parent_function_name(), client=client)
     def __user_function_wrapper(func, *args, **kwargs):     
         nonlocal trace
         results = func(*args, **kwargs)
@@ -43,6 +44,9 @@ def capture_trace(func, *args, **kwargs) -> Trace:
         trace = Trace(results, run_tree) 
 
     # run function with temporarily modified environmental variables
+    # LANGCHAIN_TRACING_V2 cannot be set in the client as is checked directly in traceable
+    # we also cannot set this in setUp and tearDown as it will affect other not Context.ai tests 
+    # as it will attempt to connect to langsmith
     with modified_environ(**__context_enviromental_variables()):
         __user_function_wrapper(func, *args, **kwargs)
 
@@ -104,8 +108,6 @@ def dynamic_traceable(func: Callable,
 
 def __context_enviromental_variables():
     return {
-        "LANGCHAIN_ENDPOINT": __context_endpoint(),
-        "LANGCHAIN_API_KEY": __context_API_key(),
         "LANGCHAIN_TRACING_V2": "true",
     }
 
