@@ -81,7 +81,9 @@ def dynamic_traceable(func: Callable,
             messages=[{"role": "user", "content": "Tell me a fun fact about the world."}],
             model="gpt-3.5-turbo")
             
-        evaluator = Evaluator('golden_response', {'golden_response': 'Hello, world'})
+        evaluator = Evaluator(
+            evaluator='golden_response',
+            options={'golden_response': 'Hello, world'})
 
         trace.add_evaluator('openai_hello_world', evaluator)
         trace.evaluate()
