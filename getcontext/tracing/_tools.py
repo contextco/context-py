@@ -9,7 +9,10 @@ from getcontext.tracing.trace import Trace
 # TASK: Try capture gloabl langsmith client, change on begin capture trace and end capture trace
 # Looks like clients try to connect on instantiation, unknown if there is a way to override this
 
-def capture_trace(func, *args, **kwargs):
+CONTEXT_TRACE_ENDPOINT = "https://with.context.ai/api/v1/evaluations/traces"
+
+
+def capture_trace(func, *args, **kwargs) -> Trace:
     """
     Capture a trace of the given function execution.
 
@@ -46,8 +49,8 @@ def capture_trace(func, *args, **kwargs):
 
 def __context_enviromental_variables():
     return {
-        "LANGCHAIN_ENDPOINT": "http://api.localtest.me:3000/api/v1/evaluations/traces" if os.environ.get("CONTEXT_SDK_DEV") else "https://with.context.ai/api/v1/evaluations/traces",
-        "LANGCHAIN_API_KEY": os.environ.get("GETCONTEXT_TOKEN"),
+        "LANGCHAIN_ENDPOINT": __context_endpoint(),
+        "LANGCHAIN_API_KEY": __context_API_key(),
         "LANGCHAIN_TRACING_V2": "true",
     }
 
@@ -61,3 +64,11 @@ def __find_test_parent_function_name():
             return frame.function
         
     raise ValueError("No test function found in stack. Make sure your test name starts or ends with 'test'.")
+
+
+def __context_endpoint():
+    return os.environ.get("CONTEXT_TRACE_ENDPOINT", CONTEXT_TRACE_ENDPOINT)
+
+
+def __context_API_key():
+    return os.environ.get("GETCONTEXT_TOKEN")
