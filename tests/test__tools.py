@@ -1,5 +1,5 @@
 import unittest
-from getcontext.tracing import Trace, capture_trace, traceable
+from getcontext.tracing import Trace, capture_trace, traceable, Evaluator
 import os
 
 
@@ -26,8 +26,6 @@ class TestTools(unittest.TestCase):
         TestTools.fibonacci_dummy(a=15)
         trace = capture_trace(TestTools.fibonacci_dummy, a=14)
         
-        trace.add_evaluator('fibonacci_dummy', {'smenatic_mathch': 'true'})
-        
         self.assertEqual(trace.result, [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233])
 
     def test_capture_trace_raises_error_on_non_callable(self):
@@ -49,10 +47,19 @@ class TestTools(unittest.TestCase):
     def test_trace_patch(self):
         # NOTE: getting exception from server
         trace = capture_trace(TestTools.fibonacci_dummy)
-        # TODO: add correct evaluator details
-        trace.add_evaluator('fibonacci_dummy', {'smenatic_mathch': 'true'})
+
+        golden_response_evaluator = Evaluator(
+            evaluator='golden_response',
+            options={
+                'golden_response': "[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]",
+                'capitalization': 'full',
+                'punctuation': 'full',
+                'whitespace': 'full'
+                }
+        )
+        trace.add_evaluator('fibonacci_dummy', golden_response_evaluator)
         
-        self.assertEqual(trace.run_tree.child_runs[0].extra['context_ai_options']['evaluators'][0], {'smenatic_mathch': 'true'})
+        self.assertEqual(trace.run_tree.child_runs[0].extra['context_ai_options']['evaluators'][0], golden_response_evaluator)
 
 
 if __name__ == '__main__':
