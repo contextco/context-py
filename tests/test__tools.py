@@ -18,7 +18,7 @@ class TestTools(unittest.TestCase):
     
     def setUp(self):
         os.environ['CONTEXT_TRACE_ENDPOINT'] = 'http://api.localtest.me:3000/api/v1/evaluations/traces'
-        os.environ['GETCONTEXT_TOKEN'] = 'QaJAbqkNNiMS1ZnVMitV41q4'
+        os.environ['GETCONTEXT_TOKEN'] = 'TOKEN'
     
     def test_capture_trace_completes_function(self):
         TestTools.fibonacci_dummy(a=15)
