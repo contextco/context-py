@@ -1,5 +1,5 @@
 import unittest
-from getcontext.tracing import Trace, capture_trace, traceable
+from getcontext.tracing import Trace
 
 
 class RunTreeMock:
