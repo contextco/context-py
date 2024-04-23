@@ -2,6 +2,8 @@ import contextlib
 import os
 
 
+CONTEXT_TRACE_ENDPOINT = "https://api.context.ai/api/v1/evaluations/traces"
+
 # Kindly stolen from https://stackoverflow.com/questions/2059482/temporarily-modify-the-current-processs-environment
 @contextlib.contextmanager
 def modified_environ(*remove, **update):
@@ -32,3 +34,30 @@ def modified_environ(*remove, **update):
     finally:
         env.update(update_after)
         [env.pop(k) for k in remove_after]
+
+
+def context_API_key() -> str:
+    """
+    Retrieves the API key for the GetContext service from the environment variables.
+
+    Returns:
+        str: The API key for the GetContext service.
+
+    Raises:
+        KeyError: If the GETCONTEXT_TOKEN environment variable is not set.
+    """
+    context_token = os.environ.get("GETCONTEXT_TOKEN")
+    if context_token is None:
+        raise KeyError("GETCONTEXT_TOKEN is not set in the environment variables.")
+
+    return context_token
+
+
+def context_endpoint() -> str:
+    """
+    Retrieves the context trace endpoint from the environment variable or the default value.
+
+    Returns:
+        str: The context trace endpoint.
+    """
+    return os.environ.get("CONTEXT_TRACE_ENDPOINT", CONTEXT_TRACE_ENDPOINT)

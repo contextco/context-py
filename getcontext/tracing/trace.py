@@ -1,6 +1,10 @@
-from langsmith.run_trees import RunTree
 from typing import Any
+
 from getcontext.generated.models import Evaluator
+from getcontext import ContextAPI
+from getcontext.token import Credential
+from getcontext.tracing._helpers import context_API_key
+from langsmith.run_trees import RunTree
 
 
 class Trace:
@@ -18,6 +22,8 @@ class Trace:
     def __init__(self, result: Any, run_tree: RunTree):
         self.result = result
         self.run_tree = run_tree
+
+        self.context_client = ContextAPI(credential=Credential(context_API_key()))
     
     def add_evaluator(self, span_name: str, evaluator: Evaluator):
         """
