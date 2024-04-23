@@ -1,11 +1,14 @@
 import inspect
-import os
 from typing import Callable
 
 from langsmith.run_helpers import get_current_run_tree
 from langsmith import traceable
 from langsmith import client as ls_client
-from getcontext.tracing._helpers import modified_environ, context_API_key, context_endpoint
+from getcontext.tracing._helpers import (
+    modified_environ,
+    context_API_key,
+    context_endpoint,
+)
 from getcontext.tracing.trace import Trace
 
 
@@ -30,31 +33,32 @@ def capture_trace(func, *args, **kwargs) -> Trace:
     trace = None
     client = ls_client.Client(api_key=context_API_key(), api_url=context_endpoint())
 
-    @traceable(run_type='chain', name=__find_test_parent_function_name(), client=client)
-    def __user_function_wrapper(func, *args, **kwargs):     
+    @traceable(run_type="chain", name=__find_test_parent_function_name(), client=client)
+    def __user_function_wrapper(func, *args, **kwargs):
         nonlocal trace
         results = func(*args, **kwargs)
         run_tree = get_current_run_tree()
 
-        trace = Trace(results, run_tree) 
+        trace = Trace(results, run_tree)
 
     # run function with temporarily modified environmental variables
     # LANGCHAIN_TRACING_V2 cannot be set in the client as is checked directly in traceable
-    # we also cannot set this in setUp and tearDown as it will affect other not Context.ai tests 
+    # we also cannot set this in setUp and tearDown as it will affect other not Context.ai tests
     # as it will attempt to connect to langsmith
-    with modified_environ(LANGCHAIN_TRACING_V2='true'):
+    with modified_environ(LANGCHAIN_TRACING_V2="true"):
         __user_function_wrapper(func, *args, **kwargs)
 
     return trace
 
 
-def dynamic_traceable(func: Callable,
-                      run_type: ls_client.RUN_TYPE_T = 'chain',
-                      name: str = None) -> Callable:
+def dynamic_traceable(
+    func: Callable, run_type: ls_client.RUN_TYPE_T = "chain", name: str = None
+) -> Callable:
     """
     Dynamically create a traceable function.
-    
-    Useful when you want to dynamically name a trace or you don't have access to the function definition (e.g. openai SDK functions)
+
+    Useful when you want to dynamically name a trace or you don't have access to the
+    function definition (e.g. openai SDK functions)
 
     Args:
         func (Callable): The function to be traced.
@@ -63,23 +67,23 @@ def dynamic_traceable(func: Callable,
 
     Returns:
         Callable: The wrapped function.
-        
+
     Example:
     .. code-block:: python
         import openai
         from getcontext.tracing import dynamic_traceable, capture_trace, Evaluator
-        
+
         openai_client = openai.Client()
         openai_chat = dynamic_traceable(
             openai_client.chat.completions.create,
             run_type='llm',
             name='openai_hello_world')
-        
+
         trace = capture_trace(
             openai_chat,
             messages=[{"role": "user", "content": "Tell me a fun fact about the world."}],
             model="gpt-3.5-turbo")
-            
+
         evaluator = Evaluator(
             evaluator='golden_response',
             options={'golden_response': 'Hello, world'})
@@ -89,13 +93,14 @@ def dynamic_traceable(func: Callable,
     """
     if not callable(func):
         raise TypeError("func argument is not callable.")
-    
+
     if name is None:
         name = func.__name__
 
     @traceable(run_type=run_type, name=name)
     def wrapper_fn(*args, **kwargs):
         return func(*args, **kwargs)
+
     wrapper_fn.__name__ = name
 
     return wrapper_fn
@@ -106,7 +111,9 @@ def __find_test_parent_function_name():
     for frame in inspect.stack():
         function_name = frame.function.lower()
 
-        if function_name.startswith('test') or function_name.endswith('test'):
+        if function_name.startswith("test") or function_name.endswith("test"):
             return frame.function
 
-    raise ValueError("No test function found in stack. Make sure your test name starts or ends with 'test'.")
+    raise ValueError(
+        "No test function found in stack. Make sure your test name starts or ends with 'test'."
+    )
