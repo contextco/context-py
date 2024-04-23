@@ -24,10 +24,7 @@ class TestTools(unittest.TestCase):
         return list(TestTools.fib(a))
 
     def setUp(self):
-        os.environ["CONTEXT_TRACE_ENDPOINT"] = (
-            "http://api.localtest.me:3000/api/v1/evaluations/traces"
-        )
-        os.environ["GETCONTEXT_TOKEN"] = "TOKEN"
+        os.environ["GETCONTEXT_TOKEN"] = "QaJAbqkNNiMS1ZnVMitV41q4"
         os.environ["CONTEXT_DOMAIN"] = "http://api.localtest.me:3000"
 
         # setup openai client with dynamic traceable
@@ -40,8 +37,8 @@ class TestTools(unittest.TestCase):
 
     def test_in_normal_prod(self):
         # ensure functions are runnable normally without context.ai
-        if "CONTEXT_TRACE_ENDPOINT" in os.environ:
-            del os.environ["CONTEXT_TRACE_ENDPOINT"]
+        if "CONTEXT_DOMAIN" in os.environ:
+            del os.environ["CONTEXT_DOMAIN"]
         TestTools.fibonacci_dummy
 
     def test_capture_trace_completes_function(self):
@@ -71,7 +68,13 @@ class TestTools(unittest.TestCase):
         self.assertIsNotNone(trace.run_tree)
 
     def test_trace_patch(self):
-        trace = capture_trace(TestTools.fibonacci_dummy)
+        trace = capture_trace(
+            self.openai_client.chat.completions.create,
+            messages=[
+                {"role": "user", "content": "Tell me a fun fact about the world."}
+            ],
+            model="gpt-3.5-turbo",
+        )
 
         golden_response_evaluator = Evaluator(
             evaluator="golden_response",
@@ -82,7 +85,7 @@ class TestTools(unittest.TestCase):
                 "whitespace": "full",
             },
         )
-        trace.add_evaluator("fibonacci_dummy", golden_response_evaluator)
+        trace.add_evaluator("specific_name_openai_chat", golden_response_evaluator)
 
         self.assertEqual(
             trace.run_tree.child_runs[0].extra["context_ai_options"]["evaluators"][0],
@@ -177,7 +180,7 @@ class TestTools(unittest.TestCase):
                 options={"golden_response": "Hello, world"},
             ),
         )
-            
+
         result = trace.evaluate()
         self.assertIsNotNone(result)
 

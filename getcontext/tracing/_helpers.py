@@ -3,7 +3,6 @@ import os
 
 
 CONTEXT_DOMAIN = "https://api.context.ai"
-CONTEXT_TRACE_ENDPOINT = "https://api.context.ai/api/v1/evaluations/traces"
 
 
 # Kindly stolen from https://stackoverflow.com/questions/2059482/temporarily-modify-the-current-processs-environment
@@ -62,7 +61,7 @@ def context_endpoint() -> str:
     Returns:
         str: The context trace endpoint.
     """
-    return os.environ.get("CONTEXT_TRACE_ENDPOINT", CONTEXT_TRACE_ENDPOINT)
+    return f"{context_domain()}/api/v1/evaluations/traces"
 
 
 def context_domain() -> str:
