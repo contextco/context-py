@@ -8,8 +8,6 @@ from langsmith import client as ls_client
 from getcontext.tracing._helpers import modified_environ
 from getcontext.tracing.trace import Trace
 
-# TASK: Try capture gloabl langsmith client, change on begin capture trace and end capture trace
-# Looks like clients try to connect on instantiation, unknown if there is a way to override this
 
 CONTEXT_TRACE_ENDPOINT = "https://api.context.ai/api/v1/evaluations/traces"
 
