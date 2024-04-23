@@ -24,7 +24,7 @@ class TestTools(unittest.TestCase):
         return list(TestTools.fib(a))
 
     def setUp(self):
-        os.environ["GETCONTEXT_TOKEN"] = "QaJAbqkNNiMS1ZnVMitV41q4"
+        os.environ["GETCONTEXT_TOKEN"] = "TOKEN"
         os.environ["CONTEXT_DOMAIN"] = "http://api.localtest.me:3000"
 
         # setup openai client with dynamic traceable
