@@ -3,7 +3,7 @@ from typing import Any
 from getcontext.generated.models import Evaluator
 from getcontext import ContextAPI
 from getcontext.token import Credential
-from getcontext.tracing._helpers import context_API_key
+from getcontext.tracing._helpers import context_API_key, context_domain, enforce_https
 from langsmith.run_trees import RunTree
 
 
@@ -23,7 +23,10 @@ class Trace:
         self.result = result
         self.run_tree = run_tree
 
-        self.context_client = ContextAPI(credential=Credential(context_API_key()))
+        self.context_client = ContextAPI(
+            credential=Credential(context_API_key()),
+            endpoint=context_domain(),
+        )
 
     def add_evaluator(self, span_name: str, evaluator: Evaluator):
         """
@@ -80,7 +83,19 @@ class Trace:
         Returns:
             dict: The evaluation results.
         """
-        raise NotImplementedError("Not implemented yet.")
+
+        run_details = self.context_client.evaluations.run(
+            body={
+                "test_set_name": str(self.run_tree.trace_id),
+                "version": "1",
+                "iterations": 1,
+            },
+            enforce_https=enforce_https(),
+        )
+
+        return self.context_client.evaluations.result(
+            id=run_details.data.run_id, enforce_https=enforce_https()
+        )
 
     def _find_run(self, span_name: str) -> RunTree:
         """

@@ -28,6 +28,15 @@ class TestTools(unittest.TestCase):
             "http://api.localtest.me:3000/api/v1/evaluations/traces"
         )
         os.environ["GETCONTEXT_TOKEN"] = "TOKEN"
+        os.environ["CONTEXT_DOMAIN"] = "http://api.localtest.me:3000"
+
+        # setup openai client with dynamic traceable
+        self.openai_client = openai.Client()
+        self.openai_client.chat.completions.create = dynamic_traceable(
+            self.openai_client.chat.completions.create,
+            run_type="llm",
+            name="specific_name_openai_chat",
+        )
 
     def test_in_normal_prod(self):
         # ensure functions are runnable normally without context.ai
@@ -139,15 +148,8 @@ class TestTools(unittest.TestCase):
         self.assertEqual(trace.result, 15)
 
     def test_dynamic_traceable_with_capture_trace_openai(self):
-        openai_client = openai.Client()
-        openai_client.chat.completions.create = dynamic_traceable(
-            openai_client.chat.completions.create,
-            run_type="llm",
-            name="specific_name_openai_chat",
-        )
-
         trace = capture_trace(
-            openai_client.chat.completions.create,
+            self.openai_client.chat.completions.create,
             messages=[
                 {"role": "user", "content": "Tell me a fun fact about the world."}
             ],
@@ -155,6 +157,29 @@ class TestTools(unittest.TestCase):
         )
 
         self.assertIsNotNone(trace.result)
+
+    ##############################
+    # trace evalution tests
+    ##############################
+
+    def test_trace_evaluate(self):
+        trace = capture_trace(
+            self.openai_client.chat.completions.create,
+            messages=[
+                {"role": "user", "content": "Respond with exactly 'Hello, world'"}
+            ],
+            model="gpt-3.5-turbo",
+        )
+        trace.add_evaluator(
+            span_name="specific_name_openai_chat",
+            evaluator=Evaluator(
+                evaluator="golden_response",
+                options={"golden_response": "Hello, world"},
+            ),
+        )
+            
+        result = trace.evaluate()
+        self.assertIsNotNone(result)
 
 
 if __name__ == "__main__":

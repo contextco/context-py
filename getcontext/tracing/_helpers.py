@@ -2,6 +2,7 @@ import contextlib
 import os
 
 
+CONTEXT_DOMAIN = "https://api.context.ai"
 CONTEXT_TRACE_ENDPOINT = "https://api.context.ai/api/v1/evaluations/traces"
 
 
@@ -62,3 +63,23 @@ def context_endpoint() -> str:
         str: The context trace endpoint.
     """
     return os.environ.get("CONTEXT_TRACE_ENDPOINT", CONTEXT_TRACE_ENDPOINT)
+
+
+def context_domain() -> str:
+    """
+    Retrieves the context domain from the environment variable or the default value.
+
+    Returns:
+        str: The context domain.
+    """
+    return os.environ.get("CONTEXT_DOMAIN", CONTEXT_DOMAIN)
+
+
+def enforce_https() -> bool:
+    """
+    Retrieves the enforce_https flag from the environment variable or the default value.
+
+    Returns:
+        bool: The enforce_https flag.
+    """
+    return context_domain().startswith("https")
