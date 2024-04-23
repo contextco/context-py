@@ -5,11 +5,8 @@ from typing import Callable
 from langsmith.run_helpers import get_current_run_tree
 from langsmith import traceable
 from langsmith import client as ls_client
-from getcontext.tracing._helpers import modified_environ
+from getcontext.tracing._helpers import modified_environ, context_API_key, context_endpoint
 from getcontext.tracing.trace import Trace
-
-
-CONTEXT_TRACE_ENDPOINT = "https://api.context.ai/api/v1/evaluations/traces"
 
 
 def capture_trace(func, *args, **kwargs) -> Trace:
@@ -31,7 +28,7 @@ def capture_trace(func, *args, **kwargs) -> Trace:
         raise TypeError("The given argument is not callable.")
 
     trace = None
-    client = ls_client.Client(api_key=__context_API_key(), api_url=__context_endpoint())
+    client = ls_client.Client(api_key=context_API_key(), api_url=context_endpoint())
 
     @traceable(run_type='chain', name=__find_test_parent_function_name(), client=client)
     def __user_function_wrapper(func, *args, **kwargs):     
@@ -45,7 +42,7 @@ def capture_trace(func, *args, **kwargs) -> Trace:
     # LANGCHAIN_TRACING_V2 cannot be set in the client as is checked directly in traceable
     # we also cannot set this in setUp and tearDown as it will affect other not Context.ai tests 
     # as it will attempt to connect to langsmith
-    with modified_environ(**__context_enviromental_variables()):
+    with modified_environ(LANGCHAIN_TRACING_V2='true'):
         __user_function_wrapper(func, *args, **kwargs)
 
     return trace
@@ -104,12 +101,6 @@ def dynamic_traceable(func: Callable,
     return wrapper_fn
 
 
-def __context_enviromental_variables():
-    return {
-        "LANGCHAIN_TRACING_V2": "true",
-    }
-
-
 def __find_test_parent_function_name():
     # iterate through the stack to find the parent function name
     for frame in inspect.stack():
@@ -117,13 +108,5 @@ def __find_test_parent_function_name():
 
         if function_name.startswith('test') or function_name.endswith('test'):
             return frame.function
-        
+
     raise ValueError("No test function found in stack. Make sure your test name starts or ends with 'test'.")
-
-
-def __context_endpoint():
-    return os.environ.get("CONTEXT_TRACE_ENDPOINT", CONTEXT_TRACE_ENDPOINT)
-
-
-def __context_API_key():
-    return os.environ.get("GETCONTEXT_TOKEN")
