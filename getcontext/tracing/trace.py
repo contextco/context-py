@@ -10,7 +10,7 @@ from langsmith.run_trees import RunTree
 class Trace:
     """
     Represents a trace object used for adding evaluators to spans in a run tree.
-    
+
     Args:
         result (Any): The result of the trace.
         run_tree (RunTree): The run tree of the trace.
@@ -18,13 +18,13 @@ class Trace:
 
     # known key, which is interpreted on the server side
     CONTEXT_AI_OPTIONS = "context_ai_options"
-    
+
     def __init__(self, result: Any, run_tree: RunTree):
         self.result = result
         self.run_tree = run_tree
 
         self.context_client = ContextAPI(credential=Credential(context_API_key()))
-    
+
     def add_evaluator(self, span_name: str, evaluator: Evaluator):
         """
         Adds an evaluator to the specified span in the run tree.
@@ -38,10 +38,10 @@ class Trace:
             ValueError: If no run tree is found.
             ValueError: If no matching spans are found.
             ValueError: If multiple matching spans are found and a unique span name is not specified.
-        
+
         Example:
             from getcontext.tracing import capture_trace, Evaluator
-            
+
             # Capture a trace
             trace = capture_trace(my_function)
 
@@ -65,16 +65,18 @@ class Trace:
         langsmith_run = self._find_run(span_name)
         if langsmith_run.extra is None:
             langsmith_run.extra = {}
-        context_ai_options = langsmith_run.extra.setdefault(Trace.CONTEXT_AI_OPTIONS, {})
+        context_ai_options = langsmith_run.extra.setdefault(
+            Trace.CONTEXT_AI_OPTIONS, {}
+        )
         evaluators_options = context_ai_options.setdefault("evaluators", [])
         evaluators_options.append(evaluator)
-        
+
         langsmith_run.patch()
 
     def evaluate(self):
         """
         Evaluates the trace by sending it to the server for evaluation.
-        
+
         Returns:
             dict: The evaluation results.
         """
@@ -97,16 +99,18 @@ class Trace:
         """
         if self.run_tree is None:
             raise ValueError("No run tree found.")
-        
+
         matching_runs = self._find_run_helper(self.run_tree, span_name)
-        
+
         if len(matching_runs) == 0:
             raise ValueError("No matching spans found.")
         elif len(matching_runs) > 1:
-            raise ValueError("Multiple matching spans found. You must specify a unique span name.")
-            
+            raise ValueError(
+                "Multiple matching spans found. You must specify a unique span name."
+            )
+
         return matching_runs[0]
-        
+
     def _find_run_helper(self, run_tree: RunTree, span_name: str) -> RunTree:
         """
         Helper function to recursively find the run with the specified span_name in the run tree.
@@ -125,5 +129,5 @@ class Trace:
                 matching_runs.append(run)
             else:
                 matching_runs += self._find_run_helper(run, span_name)
-            
+
         return matching_runs

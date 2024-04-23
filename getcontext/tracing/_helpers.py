@@ -4,6 +4,7 @@ import os
 
 CONTEXT_TRACE_ENDPOINT = "https://api.context.ai/api/v1/evaluations/traces"
 
+
 # Kindly stolen from https://stackoverflow.com/questions/2059482/temporarily-modify-the-current-processs-environment
 @contextlib.contextmanager
 def modified_environ(*remove, **update):
