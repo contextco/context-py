@@ -1,9 +1,10 @@
 from typing import Any
 
-from getcontext.generated.models import Evaluator
+from getcontext.generated.models import Evaluator, EvaluationsRunResponse
 from getcontext import ContextAPI
 from getcontext.token import Credential
 from getcontext.tracing._helpers import context_API_key, context_domain, enforce_https
+from getcontext.tracing.exceptions import EvaluationException, EvaluationError
 from langsmith.run_trees import RunTree
 
 
@@ -76,14 +77,18 @@ class Trace:
 
         langsmith_run.patch()
 
-    def evaluate(self):
+    def evaluate(self) -> EvaluationsRunResponse:
         """
-        Evaluates the trace by sending it to the server for evaluation.
+        Evaluates the trace by running the evaluations on the context client.
 
         Returns:
-            dict: The evaluation results.
-        """
+            EvaluationsRunResponse: The response of the evaluations.
 
+        Raises:
+            EvaluationError: If the evaluation fails.
+            EvaluationException: If there are any failed, inconclusive, or partially passed evaluations.
+        """
+        # TODO: give good error message if you attempt to evaluate a trace without evaluators
         run_details = self.context_client.evaluations.run(
             body={
                 "test_set_name": str(self.run_tree.trace_id),
@@ -93,9 +98,59 @@ class Trace:
             enforce_https=enforce_https(),
         )
 
-        return self.context_client.evaluations.result(
-            id=run_details.data.run_id, enforce_https=enforce_https()
+        results = self._poll_for_result(run_details.data.run_id)
+
+        if results.status == "failed":
+            raise EvaluationError(f"Evaluation failed:\n {results.as_dict()}")
+
+        failed_evaluation_msgs = self._parse_evaluation_results(results)
+        failed_msg = self._create_evaluation_fail_msg(failed_evaluation_msgs)
+
+        if failed_msg:
+            raise EvaluationException(failed_msg)
+
+        return results
+
+    def _parse_evaluation_results(self, results: EvaluationsRunResponse):
+        outcome_map = {
+            "positive": "passed",
+            "negative": "failed",
+            "partially_passed": "partially passed",
+            "inconclusive": "inconclusive",
+        }
+
+        failed_evaluation_msgs = []
+
+        for result in results.results:
+            test_case_name = result.test_case.name
+            for evaluation in result.evaluations:
+                tick = u'\u2705'
+                x_mark = u'\u274C'
+                symbol = tick if evaluation.outcome == "positive" else x_mark
+                msg = (
+                    f"{symbol} {test_case_name}: Evaluation {outcome_map.get(evaluation.outcome)} for"
+                    f" {evaluation.evaluator_name}:\n\t {evaluation.reasoning}"
+                )
+                if evaluation.outcome == "positive":
+                    print(f"\n{msg}")
+                else:
+                    failed_evaluation_msgs.append(msg)
+        return failed_evaluation_msgs
+
+    def _create_evaluation_fail_msg(self, failed_evaluation_msgs):
+        if failed_evaluation_msgs:
+            joined_failed_evaluations = "\n\n".join(failed_evaluation_msgs)
+            return f"\n\nEvaluation failed:\n {joined_failed_evaluations}"
+
+    def _poll_for_result(self, run_id: str) -> EvaluationsRunResponse:
+        result = self.context_client.evaluations.result(
+            id=run_id, enforce_https=enforce_https()
         )
+        while result.status in ["running", "pending"]:
+            result = self.context_client.evaluations.result(
+                id=run_id, enforce_https=enforce_https()
+            )
+        return result
 
     def _find_run(self, span_name: str) -> RunTree:
         """
