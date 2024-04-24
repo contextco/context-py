@@ -9,6 +9,7 @@ from getcontext.tracing import (
     wrap_openai,
     dynamic_traceable,
 )
+from getcontext.tracing.exceptions import EvaluationsFailedError
 
 
 class TestTools(unittest.TestCase):
@@ -165,7 +166,7 @@ class TestTools(unittest.TestCase):
     # trace evalution tests
     ##############################
 
-    def test_trace_evaluate(self):
+    def test_trace_evaluate_pass(self):
         trace = capture_trace(
             self.openai_client.chat.completions.create,
             messages=[
@@ -183,6 +184,25 @@ class TestTools(unittest.TestCase):
 
         result = trace.evaluate()
         self.assertIsNotNone(result)
+
+    def test_trace_evaluate_fail(self):
+        trace = capture_trace(
+            self.openai_client.chat.completions.create,
+            messages=[
+                {"role": "user", "content": "Respond with exactly 'Hello, world'"}
+            ],
+            model="gpt-3.5-turbo",
+        )
+        trace.add_evaluator(
+            span_name="specific_name_openai_chat",
+            evaluator=Evaluator(
+                evaluator="golden_response",
+                options={"golden_response": "Another random string!!!"},
+            ),
+        )
+
+        with self.assertRaises(EvaluationsFailedError):
+            trace.evaluate()
 
 
 if __name__ == "__main__":
