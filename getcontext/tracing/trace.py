@@ -1,10 +1,11 @@
 from typing import Any
 
 from getcontext.generated.models import Evaluator, EvaluationsRunResponse
+from getcontext.generated.models._enums import EvaluationsRunResponseStatus
 from getcontext import ContextAPI
 from getcontext.token import Credential
 from getcontext.tracing._helpers import context_API_key, context_domain, enforce_https
-from getcontext.tracing.exceptions import EvaluationException, EvaluationError
+from getcontext.tracing.exceptions import EvaluationsFailedError, InternalContextError
 from langsmith.run_trees import RunTree
 
 
@@ -23,6 +24,8 @@ class Trace:
     def __init__(self, result: Any, run_tree: RunTree):
         self.result = result
         self.run_tree = run_tree
+
+        self.enforce_https = enforce_https()
 
         self.context_client = ContextAPI(
             credential=Credential(context_API_key()),
@@ -85,29 +88,30 @@ class Trace:
             EvaluationsRunResponse: The response of the evaluations.
 
         Raises:
-            EvaluationError: If the evaluation fails.
-            EvaluationException: If there are any failed, inconclusive, or partially passed evaluations.
+            InternalContextError: If the evaluation fails.
+            EvaluationsFailedError: If there are any failed, inconclusive, or partially passed evaluations.
         """
         # TODO: give good error message if you attempt to evaluate a trace without evaluators
+        # TWO options, keep state locally or hit endpoint and see if error msg says test set does not exist
         run_details = self.context_client.evaluations.run(
             body={
                 "test_set_name": str(self.run_tree.trace_id),
                 "version": "1",
                 "iterations": 1,
             },
-            enforce_https=enforce_https(),
+            enforce_https=self.enforce_https,
         )
 
         results = self._poll_for_result(run_details.data.run_id)
 
-        if results.status == "failed":
-            raise EvaluationError(f"Evaluation failed:\n {results.as_dict()}")
+        if results.status == EvaluationsRunResponseStatus.ERRORED:
+            raise InternalContextError(f"Evaluation failed:\n {results.as_dict()}")
 
         failed_evaluation_msgs = self._parse_evaluation_results(results)
         failed_msg = self._create_evaluation_fail_msg(failed_evaluation_msgs)
 
         if failed_msg:
-            raise EvaluationException(failed_msg)
+            raise EvaluationsFailedError(failed_msg)
 
         return results
 
@@ -144,11 +148,11 @@ class Trace:
 
     def _poll_for_result(self, run_id: str) -> EvaluationsRunResponse:
         result = self.context_client.evaluations.result(
-            id=run_id, enforce_https=enforce_https()
+            id=run_id, enforce_https=self.enforce_https
         )
         while result.status in ["running", "pending"]:
             result = self.context_client.evaluations.result(
-                id=run_id, enforce_https=enforce_https()
+                id=run_id, enforce_https=self.enforce_https
             )
         return result
 

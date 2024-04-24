@@ -4,14 +4,14 @@ class ContextException(Exception):
     pass
 
 
-class EvaluationException(ContextException):
+class EvaluationsFailedError(ContextException):
     """
     Evaluations did not succeed.
     """
     pass
 
 
-class EvaluationError(ContextException):
+class InternalContextError(ContextException):
     """
     An error occurred during evaluation.
     """

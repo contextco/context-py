@@ -9,7 +9,7 @@ from getcontext.tracing import (
     wrap_openai,
     dynamic_traceable,
 )
-from getcontext.tracing.exceptions import EvaluationException
+from getcontext.tracing.exceptions import EvaluationsFailedError
 
 
 class TestTools(unittest.TestCase):
@@ -201,7 +201,7 @@ class TestTools(unittest.TestCase):
             ),
         )
 
-        with self.assertRaises(EvaluationException):
+        with self.assertRaises(EvaluationsFailedError):
             trace.evaluate()
 
 
