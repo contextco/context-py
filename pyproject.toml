@@ -16,6 +16,9 @@ azure-mgmt-core = "<2.0.0"
 aiohttp = "^3.8.4"
 langsmith = ">= 0.1.3, <= 0.1.49"
 
+[tool.poetry.group.dev.dependencies]
+openai = "*"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
