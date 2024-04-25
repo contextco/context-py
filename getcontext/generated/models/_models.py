@@ -1319,9 +1319,8 @@ class ReasoningResult(_serialization.Model):
 
     All required parameters must be populated in order to send to server.
 
-    :ivar verdict: Required. Known values are: "positive", "negative", "inconclusive", and
-     "partially_passed".
-    :vartype verdict: str or ~context_api.models.ReasoningResultVerdict
+    :ivar verdict: Required.
+    :vartype verdict: bool
     :ivar reason: Required.
     :vartype reason: str
     """
@@ -1332,15 +1331,14 @@ class ReasoningResult(_serialization.Model):
     }
 
     _attribute_map = {
-        "verdict": {"key": "verdict", "type": "str"},
+        "verdict": {"key": "verdict", "type": "bool"},
         "reason": {"key": "reason", "type": "str"},
     }
 
-    def __init__(self, *, verdict: Union[str, "_models.ReasoningResultVerdict"], reason: str, **kwargs: Any) -> None:
+    def __init__(self, *, verdict: bool, reason: str, **kwargs: Any) -> None:
         """
-        :keyword verdict: Required. Known values are: "positive", "negative", "inconclusive", and
-         "partially_passed".
-        :paramtype verdict: str or ~context_api.models.ReasoningResultVerdict
+        :keyword verdict: Required.
+        :paramtype verdict: bool
         :keyword reason: Required.
         :paramtype reason: str
         """

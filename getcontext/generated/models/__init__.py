@@ -55,7 +55,6 @@ from ._enums import MessageParamsType
 from ._enums import MessageRole
 from ._enums import MessageType
 from ._enums import Rating
-from ._enums import ReasoningResultVerdict
 from ._enums import TestCaseFrom
 from ._enums import TestCaseMessageRole
 from ._patch import __all__ as _patch_all
@@ -111,7 +110,6 @@ __all__ = [
     "MessageRole",
     "MessageType",
     "Rating",
-    "ReasoningResultVerdict",
     "TestCaseFrom",
     "TestCaseMessageRole",
 ]

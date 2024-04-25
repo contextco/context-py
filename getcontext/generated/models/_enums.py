@@ -75,15 +75,6 @@ class Rating(int, Enum, metaclass=CaseInsensitiveEnumMeta):
     """Positive"""
 
 
-class ReasoningResultVerdict(str, Enum, metaclass=CaseInsensitiveEnumMeta):
-    """ReasoningResultVerdict."""
-
-    POSITIVE = "positive"
-    NEGATIVE = "negative"
-    INCONCLUSIVE = "inconclusive"
-    PARTIALLY_PASSED = "partially_passed"
-
-
 class TestCaseFrom(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     """TestCaseFrom."""
 

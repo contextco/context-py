@@ -259,7 +259,7 @@ class TestTools(unittest.TestCase):
         trace = capture_trace(
             self.openai_client.chat.completions.create,
             messages=[
-                {"role": "assistant", "content": "The tallest building in the world is the Burj Khalifa."},
+                {"role": "system", "content": "The tallest building in the world is the Burj Khalifa."},
                 {"role": "user", "content": "What is the name of the tallest building in the world?"},
             ],
             model="gpt-3.5-turbo",
