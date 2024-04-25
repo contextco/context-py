@@ -1,6 +1,6 @@
 from typing import Any
 
-from getcontext.generated.models import Evaluator, EvaluationsRunResponse
+from getcontext.generated.models import Evaluator, EvaluationsRunResponse, EvaluationReasoning
 from getcontext.generated.models._enums import EvaluationsRunResponseStatus
 from getcontext import ContextAPI
 from getcontext.token import Credential
@@ -128,18 +128,27 @@ class Trace:
         for result in results.results:
             test_case_name = result.test_case.name
             for evaluation in result.evaluations:
-                tick = u'\u2705'
-                x_mark = u'\u274C'
-                symbol = tick if evaluation.outcome == "positive" else x_mark
                 msg = (
-                    f"{symbol} {test_case_name}: Evaluation {outcome_map.get(evaluation.outcome)} for"
-                    f" {evaluation.evaluator_name}:\n\t {evaluation.reasoning}"
+                    f"{self._symbol(evaluation.outcome == 'positive')} {test_case_name}: "
+                    f"Evaluation {outcome_map.get(evaluation.outcome)} for "
+                    f"{evaluation.evaluator_name}: {self._create_reasoning_msg(evaluation.reasoning)}"
                 )
-                if evaluation.outcome == "positive":
-                    print(f"\n{msg}")
-                else:
+                # TODO: use correct logger here
+                print(f"\n{msg}")
+
+                if evaluation.outcome != "positive":
                     failed_evaluation_msgs.append(msg)
         return failed_evaluation_msgs
+
+    def _create_reasoning_msg(self, reasoning: EvaluationReasoning):
+        if reasoning is None:
+            return ""
+
+        return "".join([f"\n\t{self._symbol(t.verdict)} {t.reason}" for t in reasoning.result])
+
+    def _symbol(self, success: bool):
+        tick, x_mark = u'\u2705', u'\u274C'
+        return tick if success else x_mark
 
     def _create_evaluation_fail_msg(self, failed_evaluation_msgs):
         if failed_evaluation_msgs:
