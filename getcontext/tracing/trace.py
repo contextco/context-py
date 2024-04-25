@@ -144,7 +144,11 @@ class Trace:
         if reasoning is None:
             return ""
 
-        return "".join([f"\n\t{self._symbol(t.verdict)} {t.reason}" for t in reasoning.result])
+        msg = ""
+        for res in reasoning.result:
+            msg += f"\n\t{self._symbol(res.verdict)} {res.reason}"
+
+        return msg
 
     def _symbol(self, success: bool):
         tick, x_mark = u'\u2705', u'\u274C'
