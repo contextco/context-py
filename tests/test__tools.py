@@ -254,6 +254,33 @@ class TestTools(unittest.TestCase):
             ),
         )
 
+    def test_trace_faithfulness(self):
+        # NOTE: faithfulness is not working atm server side
+        trace = capture_trace(
+            self.openai_client.chat.completions.create,
+            messages=[
+                {"role": "assistant", "content": "The tallest building in the world is the Burj Khalifa."},
+                {"role": "user", "content": "What is the name of the tallest building in the world?"},
+            ],
+            model="gpt-3.5-turbo",
+        )
+        trace.add_evaluator(
+            span_name="specific_name_openai_chat",
+            evaluator=Evaluator(
+                evaluator="faithfulness",
+            ),
+        )
+        trace.add_evaluator(
+            span_name="specific_name_openai_chat",
+            evaluator=Evaluator(
+                evaluator="golden_response",
+                options={"golden_response": "Burj Khalifa"},
+            ),
+        )
+
+        with self.assertRaises(EvaluationsFailedError):
+            trace.evaluate()
+
 
 if __name__ == "__main__":
     unittest.main()
