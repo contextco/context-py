@@ -47,6 +47,7 @@ class Trace:
             ValueError: If multiple matching spans are found and a unique span name is not specified.
 
         Example:
+        .. code-block:: python
             from getcontext.tracing import capture_trace, Evaluator
 
             # Capture a trace

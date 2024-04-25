@@ -63,6 +63,10 @@ class TestTools(unittest.TestCase):
             trace.run_tree.name, "test_capture_trace_has_correct_parent_name"
         )
 
+    def test_capture_trace_has_correct_name(self):
+        trace = capture_trace(TestTools.fibonacci_dummy, trace_name="brand_new_trace")
+        self.assertEqual(trace.run_tree.name, "brand_new_trace")
+
     def test_capture_trace_returns_run_tree(self):
         trace = capture_trace(TestTools.fibonacci_dummy)
         self.assertIsNotNone(trace.run_tree)
