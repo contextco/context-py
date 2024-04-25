@@ -1,5 +1,5 @@
 import inspect
-from typing import Callable
+from typing import Callable, Mapping, Any, List
 
 from langsmith.run_helpers import get_current_run_tree
 from langsmith import traceable
@@ -55,7 +55,13 @@ def capture_trace(func, trace_name=None, *args, **kwargs) -> Trace:
 
 
 def dynamic_traceable(
-    func: Callable, run_type: ls_client.RUN_TYPE_T = "chain", name: str = None
+    func: Callable,
+    run_type: ls_client.RUN_TYPE_T = "chain",
+    name: str = None,
+    metadata: Mapping[str, Any] = None,
+    tags: List[str] = None,
+    reduce_fn: Callable = None,
+    process_inputs: Callable[[dict], dict] = None,
 ) -> Callable:
     """
     Dynamically create a traceable function.
@@ -100,7 +106,14 @@ def dynamic_traceable(
     if name is None:
         name = func.__name__
 
-    @traceable(run_type=run_type, name=name)
+    @traceable(
+        run_type=run_type,
+        name=name,
+        metadata=metadata,
+        tags=tags,
+        reduce_fn=reduce_fn,
+        process_inputs=process_inputs
+    )
     def wrapper_fn(*args, **kwargs):
         return func(*args, **kwargs)
 
