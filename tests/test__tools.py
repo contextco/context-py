@@ -25,7 +25,6 @@ class TestTools(unittest.TestCase):
         return list(TestTools.fib(a))
 
     def setUp(self):
-        os.environ["GETCONTEXT_TOKEN"] = "TOKEN"
         os.environ["CONTEXT_DOMAIN"] = "http://api.localtest.me:3000"
 
         # setup openai client with dynamic traceable
@@ -203,6 +202,57 @@ class TestTools(unittest.TestCase):
 
         with self.assertRaises(EvaluationsFailedError):
             trace.evaluate()
+
+    def test_trace_multiple_test_cases(self):
+        """Test that evaluators can be added to multiple spans in a trace"""
+
+        @traceable(run_type="chain")
+        def my_complex_llm_chain():
+            client = openai.Client()
+
+            joke_fetcher = dynamic_traceable(
+                client.chat.completions.create,
+                run_type="llm",
+                name="joke_fetcher",
+            )
+
+            joke_fetcher(
+                messages=[
+                    {"role": "user", "content": "Tell me a fun fact about the world."}
+                ],
+                model="gpt-3.5-turbo",
+            )
+
+            serious_fact_fetcher = dynamic_traceable(
+                client.chat.completions.create,
+                run_type="llm",
+                name="serious_fact_fetcher",
+            )
+
+            serious_fact_fetcher(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": "Tell me a joke.",
+                    }
+                ],
+                model="gpt-3.5-turbo",
+            )
+
+        trace = capture_trace(my_complex_llm_chain)
+
+        trace.add_evaluator(
+            span_name="joke_fetcher",
+            evaluator=Evaluator(
+                evaluator="attempts_answer",
+            ),
+        )
+        trace.add_evaluator(
+            span_name="serious_fact_fetcher",
+            evaluator=Evaluator(
+                evaluator="refuse_answer",
+            ),
+        )
 
 
 if __name__ == "__main__":
