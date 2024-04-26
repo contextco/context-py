@@ -1,6 +1,11 @@
 from typing import Any
+import time
 
-from getcontext.generated.models import Evaluator, EvaluationsRunResponse, EvaluationReasoning
+from getcontext.generated.models import (
+    Evaluator,
+    EvaluationsRunResponse,
+    EvaluationReasoning,
+)
 from getcontext.generated.models._enums import EvaluationsRunResponseStatus
 from getcontext import ContextAPI
 from getcontext.token import Credential
@@ -20,6 +25,7 @@ class Trace:
 
     # known key, which is interpreted on the server side
     CONTEXT_AI_OPTIONS = "context_ai_options"
+    POLLING_INTERVAL = 0.75  # time in seconds to wait between polling
 
     def __init__(self, result: Any, run_tree: RunTree):
         self.result = result
@@ -152,7 +158,7 @@ class Trace:
         return msg
 
     def _symbol(self, success: bool):
-        tick, x_mark = u'\u2705', u'\u274C'
+        tick, x_mark = "\u2705", "\u274C"
         return tick if success else x_mark
 
     def _create_evaluation_fail_msg(self, failed_evaluation_msgs):
@@ -165,6 +171,7 @@ class Trace:
             id=run_id, enforce_https=self.enforce_https
         )
         while result.status in ["running", "pending"]:
+            time.sleep(Trace.POLLING_INTERVAL)
             result = self.context_client.evaluations.result(
                 id=run_id, enforce_https=self.enforce_https
             )
