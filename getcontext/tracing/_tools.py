@@ -1,5 +1,5 @@
 import inspect
-from typing import Callable
+from typing import Callable, Mapping, Any, List
 
 from langsmith.run_helpers import get_current_run_tree
 from langsmith import traceable
@@ -12,12 +12,13 @@ from getcontext.tracing._helpers import (
 from getcontext.tracing.trace import Trace
 
 
-def capture_trace(func, *args, **kwargs) -> Trace:
+def capture_trace(func, trace_name=None, *args, **kwargs) -> Trace:
     """
     Capture a trace of the given function execution.
 
     Args:
         func: The function to capture the trace for.
+        trace_name: The name of the trace. If not provided, the name of the test function will be used.
         *args: Positional arguments to pass to the function.
         **kwargs: Keyword arguments to pass to the function.
 
@@ -33,8 +34,9 @@ def capture_trace(func, *args, **kwargs) -> Trace:
     trace = None
     # auto_batch_tracing=False prevents async tracing
     client = ls_client.Client(api_key=context_API_key(), api_url=context_endpoint(), auto_batch_tracing=False)
+    name = trace_name or __find_test_parent_function_name()
 
-    @traceable(run_type="chain", name=__find_test_parent_function_name(), client=client)
+    @traceable(run_type="chain", name=name, client=client)
     def __user_function_wrapper(func, *args, **kwargs):
         nonlocal trace
         results = func(*args, **kwargs)
@@ -53,7 +55,13 @@ def capture_trace(func, *args, **kwargs) -> Trace:
 
 
 def dynamic_traceable(
-    func: Callable, run_type: ls_client.RUN_TYPE_T = "chain", name: str = None
+    func: Callable,
+    run_type: ls_client.RUN_TYPE_T = "chain",
+    name: str = None,
+    metadata: Mapping[str, Any] = None,
+    tags: List[str] = None,
+    reduce_fn: Callable = None,
+    process_inputs: Callable[[dict], dict] = None,
 ) -> Callable:
     """
     Dynamically create a traceable function.
@@ -98,7 +106,14 @@ def dynamic_traceable(
     if name is None:
         name = func.__name__
 
-    @traceable(run_type=run_type, name=name)
+    @traceable(
+        run_type=run_type,
+        name=name,
+        metadata=metadata,
+        tags=tags,
+        reduce_fn=reduce_fn,
+        process_inputs=process_inputs
+    )
     def wrapper_fn(*args, **kwargs):
         return func(*args, **kwargs)
 
@@ -116,5 +131,6 @@ def __find_test_parent_function_name():
             return frame.function
 
     raise ValueError(
-        "No test function found in stack. Make sure your test name starts or ends with 'test'."
+        ("No test function found in stack. Make sure your test name starts "
+         "or ends with 'test'. or set trace_name in capture_trace().")
     )
