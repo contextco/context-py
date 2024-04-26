@@ -32,8 +32,7 @@ def capture_trace(func, trace_name=None, *args, **kwargs) -> Trace:
         raise TypeError("The given argument is not callable.")
 
     trace = None
-    # auto_batch_tracing=False prevents async tracing
-    client = ls_client.Client(api_key=context_API_key(), api_url=context_endpoint(), auto_batch_tracing=False)
+    client = ls_client.Client(api_key=context_API_key(), api_url=context_endpoint())
     name = trace_name or __find_test_parent_function_name()
 
     @traceable(run_type="chain", name=name, client=client)

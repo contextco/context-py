@@ -2,11 +2,22 @@ import unittest
 from getcontext.tracing import Trace
 
 
+class TracingQueueMock:
+    def join(self):
+        pass
+
+
+class MockLsClient:
+    def __init__(self):
+        self.tracing_queue = TracingQueueMock()
+
+
 class RunTreeMock:
     def __init__(self, name):
         self.name = name
         self.child_runs = []
         self.extra = None
+        self.client = MockLsClient()
 
     def patch(self):
         pass
