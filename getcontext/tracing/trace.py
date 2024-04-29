@@ -100,9 +100,6 @@ class Trace:
             InternalContextError: If the evaluation fails.
             EvaluationsFailedError: If there are any failed, inconclusive, or partially passed evaluations.
         """
-        # TODO: give good error message if you attempt to evaluate a trace without evaluators
-        # TWO options, keep state locally or hit endpoint and see if error msg says test set does not exist
-
         self.run_tree.client.tracing_queue.join()
 
         run_details = self.context_client.evaluations.run(
