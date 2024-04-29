@@ -12,7 +12,7 @@ from getcontext.tracing._helpers import (
 from getcontext.tracing.trace import Trace
 
 
-def capture_trace(func, trace_name=None, *args, **kwargs) -> Trace:
+def capture_trace(func, *args, trace_name=None, **kwargs) -> Trace:
     """
     Capture a trace of the given function execution.
 

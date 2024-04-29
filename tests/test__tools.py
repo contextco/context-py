@@ -43,18 +43,19 @@ class TestTools(unittest.TestCase):
 
     def test_capture_trace_completes_function(self):
         TestTools.fibonacci_dummy(a=15)
-        trace = capture_trace(TestTools.fibonacci_dummy, a=14)
+        trace = capture_trace(TestTools.fibonacci_dummy, a=14, trace_name="my_trace")
 
         self.assertEqual(
             trace.result, [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233]
         )
+        self.assertEqual(trace.run_tree.name, "my_trace")
 
     def test_capture_trace_raises_error_on_non_callable(self):
         with self.assertRaises(TypeError):
             capture_trace(5)
 
     def test_capture_trace_returns_trace_instance(self):
-        trace = capture_trace(TestTools.fibonacci_dummy)
+        trace = capture_trace(TestTools.fibonacci_dummy, 5)
         self.assertIsInstance(trace, Trace)
 
     def test_capture_trace_has_correct_parent_name(self):
