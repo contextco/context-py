@@ -1,5 +1,6 @@
 from typing import Any
 import time
+import logging
 
 from getcontext.generated.models import (
     Evaluator,
@@ -23,8 +24,7 @@ class Trace:
         run_tree (RunTree): The run tree of the trace.
     """
 
-    # known key, which is interpreted on the server side
-    CONTEXT_AI_OPTIONS = "context_ai_options"
+    CONTEXT_AI_OPTIONS = "context_ai_options"  # known key, which is interpreted on the server side
     POLLING_INTERVAL = 0.75  # time in seconds to wait between polling
 
     def __init__(self, result: Any, run_tree: RunTree):
@@ -32,6 +32,7 @@ class Trace:
         self.run_tree = run_tree
 
         self.enforce_https = enforce_https()
+        self.logger = logging.getLogger("context-ai")
 
         self.context_client = ContextAPI(
             credential=Credential(context_API_key()),
@@ -100,8 +101,10 @@ class Trace:
             InternalContextError: If the evaluation fails.
             EvaluationsFailedError: If there are any failed, inconclusive, or partially passed evaluations.
         """
+        self.logger.info("Awaiting trace updates completion...")
         self.run_tree.client.tracing_queue.join()
 
+        self.logger.info("Requesting evaluation run.")
         run_details = self.context_client.evaluations.run(
             body={
                 "test_set_name": str(self.run_tree.trace_id),
@@ -142,11 +145,12 @@ class Trace:
                     f"Evaluation {outcome_map.get(evaluation.outcome)} for "
                     f"{evaluation.evaluator_name}: {self._create_reasoning_msg(evaluation.reasoning)}"
                 )
-                # TODO: use correct logger here
-                print(f"\n{msg}")
 
                 if evaluation.outcome != "positive":
+                    self.logger.warning(f"\n{msg}")
                     failed_evaluation_msgs.append(msg)
+                else:
+                    self.logger.info(f"\n{msg}")
         return failed_evaluation_msgs
 
     def _create_reasoning_msg(self, reasoning: EvaluationReasoning):
@@ -169,6 +173,7 @@ class Trace:
             return f"\n\nEvaluation failed:\n {joined_failed_evaluations}"
 
     def _poll_for_result(self, run_id: str) -> EvaluationsRunResponse:
+        self.logger.info(f"Beginning evaluation polling ({Trace.POLLING_INTERVAL} cadence).")
         result = self.context_client.evaluations.result(
             id=run_id, enforce_https=self.enforce_https
         )
@@ -177,6 +182,8 @@ class Trace:
             result = self.context_client.evaluations.result(
                 id=run_id, enforce_https=self.enforce_https
             )
+
+        self.logger.info(f"Evaluation complete: {result.status}")
         return result
 
     def _find_run(self, span_name: str) -> RunTree:
