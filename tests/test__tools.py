@@ -1,14 +1,15 @@
 import unittest
 import os
+import logging
 import openai
 from getcontext.tracing import (
     Trace,
     capture_trace,
     traceable,
     Evaluator,
-    wrap_openai,
     dynamic_traceable,
 )
+from langsmith.wrappers import wrap_openai
 from getcontext.tracing.exceptions import EvaluationsFailedError
 
 
@@ -34,6 +35,8 @@ class TestTools(unittest.TestCase):
             run_type="llm",
             name="specific_name_openai_chat",
         )
+        logging.basicConfig()
+        logging.getLogger('context-ai').setLevel(logging.INFO)
 
     def test_in_normal_prod(self):
         # ensure functions are runnable normally without context.ai
