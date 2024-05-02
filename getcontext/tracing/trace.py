@@ -1,6 +1,7 @@
 from typing import Any
 import time
 import logging
+import sys
 
 from getcontext.generated.models import (
     Evaluator,
@@ -13,6 +14,10 @@ from getcontext.token import Credential
 from getcontext.tracing._helpers import context_API_key, context_domain, enforce_https
 from getcontext.tracing.exceptions import EvaluationsFailedError, InternalContextError
 from langsmith.run_trees import RunTree
+
+
+# tells unittest to interpret AssertionError derived exceptions as test failures
+__unittest = True
 
 
 class Trace:
@@ -123,6 +128,9 @@ class Trace:
         failed_msg = self._create_evaluation_fail_msg(failed_evaluation_msgs)
 
         if failed_msg:
+            # set the global variable on the parent stack so unittest will interpret the exception as a test failure
+            if "__unittest" not in sys._getframe(1).f_globals:
+                sys._getframe(1).f_globals["__unittest"] = True
             raise EvaluationsFailedError(failed_msg)
 
         return results

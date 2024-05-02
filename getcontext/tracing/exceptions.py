@@ -1,6 +1,6 @@
 
 
-class ContextException(Exception):
+class ContextException(AssertionError):
     pass
 
 
