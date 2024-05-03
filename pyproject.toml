@@ -18,6 +18,9 @@ langsmith = ">= 0.1.3, <= 0.1.49"
 
 [tool.poetry.group.dev.dependencies]
 openai = "*"
+faiss-cpu = "*"
+langchain = "*"
+langchain-openai = "*"
 
 [build-system]
 requires = ["poetry-core"]
