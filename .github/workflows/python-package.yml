@@ -16,6 +16,7 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GETCONTEXT_TOKEN: ${{ secrets.GETCONTEXT_TOKEN }}
+      LANGCHAIN_ENDPOINT: "https://api.context.ai/evaluations/traces"
     strategy:
       fail-fast: false
       matrix:
