@@ -292,7 +292,7 @@ class TestTools(unittest.TestCase):
     ##############################
 
     @traceable
-    def my_caller_func():
+    def run_langchain_retriever():
         from langchain_community.document_loaders import TextLoader
         from langchain_community.vectorstores import FAISS
         from langchain_openai import OpenAIEmbeddings
@@ -311,7 +311,7 @@ class TestTools(unittest.TestCase):
         retriever.with_config({"run_name": "Custom run name"}).invoke("what did he say about ketanji brown jackson")
 
     def test_openai_retriever(self):
-        capture_trace(TestTools.my_caller_func)
+        capture_trace(TestTools.run_langchain_retriever)
 
 
 if __name__ == "__main__":
