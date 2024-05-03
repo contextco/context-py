@@ -287,6 +287,32 @@ class TestTools(unittest.TestCase):
         with self.assertRaises(EvaluationsFailedError):
             trace.evaluate()
 
+    ##############################
+    # retriever tests
+    ##############################
+
+    @traceable
+    def run_langchain_retriever():
+        from langchain_community.document_loaders import TextLoader
+        from langchain_community.vectorstores import FAISS
+        from langchain_openai import OpenAIEmbeddings
+        from langchain_text_splitters import CharacterTextSplitter
+
+        loader = TextLoader("./tests/state_of_the_union.txt")
+
+        documents = loader.load()
+        text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+        texts = text_splitter.split_documents(documents)
+        embeddings = OpenAIEmbeddings()
+        db = FAISS.from_documents(texts, embeddings)
+
+        retriever = db.as_retriever()
+
+        retriever.with_config({"run_name": "Custom run name"}).invoke("what did he say about ketanji brown jackson")
+
+    def test_openai_retriever(self):
+        capture_trace(TestTools.run_langchain_retriever)
+
 
 if __name__ == "__main__":
     unittest.main()
