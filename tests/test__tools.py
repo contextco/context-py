@@ -26,8 +26,6 @@ class TestTools(unittest.TestCase):
         return list(TestTools.fib(a))
 
     def setUp(self):
-        os.environ["CONTEXT_DOMAIN"] = "http://api.localtest.me:3000"
-
         # setup openai client with dynamic traceable
         self.openai_client = openai.Client()
         self.openai_client.chat.completions.create = dynamic_traceable(
