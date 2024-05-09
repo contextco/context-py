@@ -93,7 +93,7 @@ class Trace:
 
         self.run_tree.client.tracing_queue.join()
 
-        langsmith_run.patch()
+        self._patch_run(langsmith_run)
 
     def evaluate(self) -> EvaluationsRunResponse:
         """
@@ -243,3 +243,20 @@ class Trace:
                 matching_runs += self._find_run_helper(run, span_name)
 
         return matching_runs
+    
+    def _patch_run(self, run) -> None:
+        # Langchain and Langsmith do tracing in two different ways... this method will support both
+        if isinstance(run, RunTree):
+            return run.patch() 
+
+        self.run_tree.client.update_run(
+            run_id=run.id,
+            end_time=run.end_time,
+            extra=run.extra,
+            error=run.error,
+            inputs=run.inputs,
+            outputs=run.outputs,
+            events=run.events,
+            tags=run.tags
+        )
+        

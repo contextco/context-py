@@ -303,15 +303,22 @@ class TestTools(unittest.TestCase):
         documents = loader.load()
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         texts = text_splitter.split_documents(documents)
+
+        for idx, text in enumerate(texts):
+            text.metadata['doc_id'] = idx
         embeddings = OpenAIEmbeddings()
         db = FAISS.from_documents(texts, embeddings)
 
         retriever = db.as_retriever()
 
-        retriever.with_config({"run_name": "Custom run name"}).invoke("what did he say about ketanji brown jackson")
+        retriever.with_config({"run_name": "my_retriever"}).invoke("what did he say about ketanji brown jackson")
 
     def test_openai_retriever(self):
-        capture_trace(TestTools.run_langchain_retriever)
+        trace = capture_trace(TestTools.run_langchain_retriever)
+
+        trace.add_evaluator('my_retriever', Evaluator(evaluator='document_metadata_matcher'))
+
+        trace.evaluate()
 
 
 if __name__ == "__main__":
