@@ -11,13 +11,20 @@ class MockLsClient:
     def __init__(self):
         self.tracing_queue = TracingQueueMock()
 
+    def update_run(self, *args, **kwargs):
+        pass
+
 
 class RunTreeMock:
     def __init__(self, name):
         self.name = name
         self.child_runs = []
-        self.extra = None
+        self.extra, self.tags = None, None
         self.client = MockLsClient()
+
+        self.id, self.endtime, self.error = None, None, None
+        self.inputs, self.outputs, self.end_time = None, None, None
+        self.events = None
 
     def patch(self):
         pass

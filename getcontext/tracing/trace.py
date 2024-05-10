@@ -243,11 +243,11 @@ class Trace:
                 matching_runs += self._find_run_helper(run, span_name)
 
         return matching_runs
-    
+
     def _patch_run(self, run) -> None:
         # Langchain and Langsmith do tracing in two different ways... this method will support both
         if isinstance(run, RunTree):
-            return run.patch() 
+            return run.patch()
 
         self.run_tree.client.update_run(
             run_id=run.id,
