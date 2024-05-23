@@ -58,3 +58,31 @@ c.log.conversation_thread(
         )
     }
 )
+
+# Log against an API tenant.
+c.log.conversation(
+    tenant_id="1234",
+    body={
+        "conversation": Conversation(
+            feedback="The agent resolved my query very fast - thank you!",
+            messages=[
+                Message(
+                    message="You are a helpful assistant!",
+                    role=MessageRole.SYSTEM,
+                    metadata={
+                        "hi": "my_metadata",
+                        }
+                ),
+                Message(
+                    message="Hello, world!",
+                    role=MessageRole.USER,
+                ),
+                Message(
+                    message="Hi, how can I help?",
+                    role=MessageRole.ASSISTANT,
+                    rating=Rating.POSITIVE,
+                ),
+            ],
+        )
+    }
+)
