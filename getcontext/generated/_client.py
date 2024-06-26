@@ -15,7 +15,7 @@ from azure.core.rest import HttpRequest, HttpResponse
 from . import models as _models
 from ._configuration import ContextAPIConfiguration
 from ._serialization import Deserializer, Serializer
-from .operations import ContextAPIOperationsMixin, EvaluationsOperations, LogOperations, UpdateOperations
+from .operations import ContextAPIOperationsMixin, EvaluationsOperations, LogOperations
 
 if TYPE_CHECKING:
     # pylint: disable=unused-import,ungrouped-imports
@@ -29,8 +29,6 @@ class ContextAPI(ContextAPIOperationsMixin):  # pylint: disable=client-accepts-a
     :vartype evaluations: context_api.operations.EvaluationsOperations
     :ivar log: LogOperations operations
     :vartype log: context_api.operations.LogOperations
-    :ivar update: UpdateOperations operations
-    :vartype update: context_api.operations.UpdateOperations
     :param credential: Credential needed for the client to connect to Azure. Required.
     :type credential: ~azure.core.credentials.TokenCredential
     :keyword endpoint: Service URL. Default value is "https://api.context.ai".
@@ -66,7 +64,6 @@ class ContextAPI(ContextAPIOperationsMixin):  # pylint: disable=client-accepts-a
         self._serialize.client_side_validation = False
         self.evaluations = EvaluationsOperations(self._client, self._config, self._serialize, self._deserialize)
         self.log = LogOperations(self._client, self._config, self._serialize, self._deserialize)
-        self.update = UpdateOperations(self._client, self._config, self._serialize, self._deserialize)
 
     def send_request(self, request: HttpRequest, *, stream: bool = False, **kwargs: Any) -> HttpResponse:
         """Runs the network request through the client's chained policies.
