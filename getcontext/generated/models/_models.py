@@ -354,7 +354,7 @@ class Message(_serialization.Model):
     :vartype role: str or ~context_api.models.MessageParamsRole
     :ivar message:
     :vartype message: str
-    :ivar type: Known values are: "message" and "tool".
+    :ivar type: Known values are: "message", "tool", and "event".
     :vartype type: str or ~context_api.models.MessageParamsType
     :ivar event_timestamp:
     :vartype event_timestamp: ~datetime.datetime
@@ -405,7 +405,7 @@ class Message(_serialization.Model):
         :paramtype role: str or ~context_api.models.MessageParamsRole
         :keyword message:
         :paramtype message: str
-        :keyword type: Known values are: "message" and "tool".
+        :keyword type: Known values are: "message", "tool", and "event".
         :paramtype type: str or ~context_api.models.MessageParamsType
         :keyword event_timestamp:
         :paramtype event_timestamp: ~datetime.datetime

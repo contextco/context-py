@@ -47,6 +47,7 @@ class MessageParamsType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
 
     MESSAGE = "message"
     TOOL = "tool"
+    EVENT = "event"
 
 
 class MessageRole(str, Enum, metaclass=CaseInsensitiveEnumMeta):
